@@ -10,7 +10,9 @@ import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -25,11 +27,12 @@ public class StockPublishTest {
 	private List<HashMap<String,Object>> CompnayAllDataList;
 	private List<HashMap<String,Double>> CompnayPecentageList=new ArrayList<HashMap<String,Double>>();
 	private List<HashMap<String,Object>> CompnayFinalData=new ArrayList<HashMap<String,Object>>();
-	@BeforeTest
+	@BeforeSuite
 	public void fetchAllSocksData() {
 		
 		RestAssuredClass Rs=new RestAssuredClass();
 		CompnayAllDataList=Rs.getAllCompaniesData();
+		CompnayAllDataList.forEach(l -> l.forEach((k,v) ->System.out.println(k+" "+v)));
 	}
 	
 	@DataProvider(name = "paralleltest",parallel=true)
@@ -174,7 +177,7 @@ public class StockPublishTest {
 		return CssSheet+Body+"</tbody></body></html>";
 		
 	}
-	@AfterTest(enabled=true)
+	@AfterSuite(enabled=true)
 	
 	public void SendEmail() throws EmailException {
 		
