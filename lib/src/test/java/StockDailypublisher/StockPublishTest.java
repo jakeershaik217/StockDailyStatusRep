@@ -184,7 +184,7 @@ public class StockPublishTest {
 		Email email = new SimpleEmail();
 		email.setHostName("smtp.googlemail.com");
 		email.setSmtpPort(465);
-		email.setAuthenticator(new DefaultAuthenticator("shaik.jakeerhussain217@gmail.com", "Jakeer217786#"));
+		email.setAuthenticator(new DefaultAuthenticator("<GmailId>", "<GmailPassword>"));
 		email.setSSLOnConnect(true);
 		email.setFrom("shaik.jakeerhussain217@gmail.com");
 		email.setSubject("Best Performing Stock");
