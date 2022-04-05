@@ -44,7 +44,7 @@ public class RestAssuredClass {
     	return CompnayDataList;
     }
     
-    public HashMap<String,Double> getprecentageChange(int Range1,int Range2,List<HashMap<String,Object>>companyList,int Slab){
+    public HashMap<String,Double> getprecentageChange(int Range1,int Range2,List<HashMap<String,Object>>companyList,double Slab){
     	HashMap<String, Double> Company=new HashMap<>();
     	if(Range2==0) {
 			for(HashMap<String,Object> Maps:companyList)
@@ -56,20 +56,18 @@ public class RestAssuredClass {
 						if(percentageChange>=Slab)
 							Company.put((String)Maps.get("CompanyName"), percentageChange);
 					}
-						
 		}else {
 		for(HashMap<String,Object> Maps:companyList)
 				if(Double.parseDouble((String)Maps.get("CompanyMarketCap")) >= Range1 && Double.parseDouble((String)Maps.get("CompanyMarketCap")) < Range2){
 					String CompanyURL=String.format(EndPoint1, Maps.get("CompanyID"));
 					response =RestAssured.given().when().baseUri(BaseURI).get(CompanyURL);
 					String Percentage=JsonPath.read(response.getBody().asString(), CompanyPercentageChange);
-					if(Percentage!=null || !Percentage.equals("") || !Percentage.contains("-")) {
+					if(Percentage!=null && !Percentage.equals("") && !Percentage.contains("-")) {
 					double percentageChange=Double.parseDouble(Percentage);
 					if(percentageChange>=Slab)
 						Company.put((String)Maps.get("CompanyName"), percentageChange);
 					}
 				}
-		
 		}
     	return Company;
     }

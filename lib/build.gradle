@@ -6,10 +6,11 @@
  * User Manual available at https://docs.gradle.org/7.3.3/userguide/building_java_projects.html
  */
 
-plugins {
+allprojects {
     // Apply the java-library plugin for API and implementation separation.
-    id 'java-library'
-}
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -30,13 +31,27 @@ implementation group: 'com.jayway.jsonpath', name: 'json-path', version: '2.6.0'
 // https://mvnrepository.com/artifact/org.apache.commons/commons-email
 implementation group: 'org.apache.commons', name: 'commons-email', version: '1.5'
 // https://mvnrepository.com/artifact/org.testng/testng
-testImplementation group: 'org.testng', name: 'testng', version: '6.14.3'
+implementation group: 'org.testng', name: 'testng', version: '6.14.3'
+// https://mvnrepository.com/artifact/org.jsoup/jsoup
+implementation group: 'org.jsoup', name: 'jsoup', version: '1.7.2'
+// https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.1'
+// https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
+implementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '2.41.0'
 
 
 }
 
-task DailyRun(type: Test) {
+task DailyRun(type:Test){
 useTestNG(){
+
 suites 'testng.xml'
+
 }
+
+
 }
+
+
+}
+

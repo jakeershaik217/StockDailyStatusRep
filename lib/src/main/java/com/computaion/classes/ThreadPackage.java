@@ -6,6 +6,8 @@ public class ThreadPackage {
 	
 	public static ThreadPackage threadPackage;
 	private static ThreadLocal<RestAssuredClass>  ThreadLocalClass=new ThreadLocal<>();
+	private static ThreadLocal<ShareHoldingChange>  ShareThreadLocalClass=new ThreadLocal<>();
+	private static ThreadLocal<ShareHoldingPercentageChange>  SharePChangeThreadClass=new ThreadLocal<>();
 	private ThreadPackage() {
 		
 		
@@ -25,8 +27,25 @@ public class ThreadPackage {
 		ThreadLocalClass.set(clsObject);	
 	}
 	
+	public void setThreadLocalShareHolding(ShareHoldingChange clsObject) {
+		System.out.println("Thread started");
+		ShareThreadLocalClass.set(clsObject);	
+	}
+	
+	public void setThreadLocalSharePChange(ShareHoldingPercentageChange clsObject) {
+		System.out.println("Thread started");
+		SharePChangeThreadClass.set(clsObject);	
+	}
+	
+	
 	public RestAssuredClass getThreadLocal() {
 		return ThreadLocalClass.get();	
+	}
+	public ShareHoldingChange getThreadLocalShareHolding() {
+		return ShareThreadLocalClass.get();	
+	}
+	public ShareHoldingPercentageChange getThreadLocalSharePchange() {
+		return SharePChangeThreadClass.get();	
 	}
 
 }

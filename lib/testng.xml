@@ -3,12 +3,7 @@
 <suite name="Suite" parallel="methods" data-provider-thread-count="7">
 	<test name="Test">
 		<classes>
-			<class name="StockDailypublisher.StockPublishTest">
-				<methods>
-					<include name="RunTesToFectStocks" />
-					<include name="getAllDataAboutCompnay" />
-				</methods>
-			</class>
+			<class name="StockDailypublisher.StockPublishTest"/>
 		</classes>
 	</test> <!-- Test -->
 </suite> <!-- Suite -->

@@ -3,8 +3,10 @@ package StockDailypublisher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
@@ -18,21 +20,22 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.RestAssured.RestPackage.RestAssuredClass;
+import com.computaion.classes.ShareHoldingChange;
 import com.computaion.classes.ThreadPackage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 
-public class StockPublishTest {
+public class ShareHoldingPublisher {
 	
-	private static final double Slab=4.98;
 	private static List<HashMap<String,Object>> CompnayAllDataList;
-	private static List<HashMap<String,Double>> CompnayPecentageList=new ArrayList<HashMap<String,Double>>();
-	private List<HashMap<String,Object>> CompnayFinalData=new ArrayList<HashMap<String,Object>>();
+	private static List<HashMap<String,Map<String,Double>>> CompnayPecentageList=new ArrayList<HashMap<String,Map<String,Double>>>();
+	public List<HashMap<String,Object>> CompnayFinalData=new ArrayList<HashMap<String,Object>>();
 	@BeforeSuite
 	public static void fetchAllSocksData() {
 		
 		RestAssuredClass Rs=new RestAssuredClass();
 		CompnayAllDataList=Rs.getAllCompaniesData();
-		//CompnayAllDataList.forEach(l -> l.forEach((k,v) ->System.out.println(k+" "+v)));
 	}
 	
 	@DataProvider(name = "paralleltest",parallel=true)
@@ -79,29 +82,34 @@ public class StockPublishTest {
 		
 	}
 	
-	@Test(priority=-1,dataProvider = "paralleltest",dataProviderClass = StockPublishTest.class,enabled=true )
-	public static void RunTesToFectStocks(HashMap<String, Integer> Maps) {
+	@Test(priority=-1,dataProvider = "paralleltest",dataProviderClass = ShareHoldingPublisher.class,enabled=true )
+	public static void RunTesToFectStocks(HashMap<String, Integer> Maps) throws JsonMappingException, JsonProcessingException {
 		
-		RestAssuredClass Rs=new RestAssuredClass();
-		ThreadPackage.getInstance().setThreadLocal(Rs);
-		CompnayPecentageList.add(ThreadPackage.getInstance().getThreadLocal().getprecentageChange(Maps.get("Range1"), Maps.get("Range2"), CompnayAllDataList, Slab));
+		ShareHoldingChange Rs=new ShareHoldingChange();
+		ThreadPackage.getInstance().setThreadLocalShareHolding(Rs);
+		CompnayPecentageList.add(ThreadPackage.getInstance().getThreadLocalShareHolding().getJsonDataFromAStock(Maps.get("Range1"), Maps.get("Range2"), CompnayAllDataList));
 	}
 	
 	@Test(priority=0)
 	public void getAllDataAboutCompnay(){
 		
 		for(HashMap<String,Object> Maps:CompnayAllDataList)
-			  for(HashMap<String,Double> MapsPercentage:CompnayPecentageList) 
+			  for(HashMap<String,Map<String,Double>> MapsPercentage:CompnayPecentageList) 
 				  for(String Key:MapsPercentage.keySet()) 
 					if(Maps.get("CompanyName").equals(Key)) {
 					HashMap<String, Object> dummyMap=new HashMap<>();	
-					dummyMap.put("Company Name", Maps.get("CompanyName"));
-					dummyMap.put("Company URL", Maps.get("CompanyURL"));
-					dummyMap.put("Company ID", Maps.get("CompanyID"));
-					dummyMap.put("Percentage Change", MapsPercentage.get(Key));
+					dummyMap.put("Company Name", Key);
+					dummyMap.put("Promoters", MapsPercentage.get(Key).get("Promoters"));
+					dummyMap.put("FIIs",  MapsPercentage.get(Key).get("FIIs"));
+					dummyMap.put("Mutual Funds",  MapsPercentage.get(Key).get("Mutual Funds"));
+					dummyMap.put("Insurance",  MapsPercentage.get(Key).get("Insurance"));
+					dummyMap.put("Other DIIs",  MapsPercentage.get(Key).get("Other DIIs"));
+					dummyMap.put("Non Inst.",  MapsPercentage.get(Key).get("Non Inst."));
+					dummyMap.put("Others",  MapsPercentage.get(Key).get("Others"));
 					CompnayFinalData.add(dummyMap);
 					}
-				  
+		
+		Collections.sort(CompnayFinalData,new comparatorClass());		  
 	}
 	
 	String CssSheet="<style>\r\n"
@@ -160,19 +168,27 @@ public class StockPublishTest {
 			+"</style>\r\n"
 			+"<html><body><table class=\'content-table\' cellspacing=\'0\'><thead>"
 			+ "<tr>"
-			+ "<th>CompnayName</th>"
-			+ "<th>ChangeInPercentage</th>"
-			+"</tr></thead>";
+			+ "<th>Compnay Name</th>"
+			+ "<th>Promoters</th>"
+			+"<th>FIIs</th>"
+			+ "<th>Mutual Funds</th>"
+			+"<th>Insurance</th>>"
+			+ "<th>Other DIIs</th>"
+			+"<th>Non Inst.</th>"
+			+ "<th>Others</th>";
 	
-	public  String composeEmailBody() {
+	
+	public String composeEmailBody() {
 		String Body="<tbody>";
-		List<String> SlabList=new ArrayList<>(Arrays.asList(new String[] {"4.99","4.98","5.0","9.99","10.0","19.99","20.0"}));
-		
 		for(HashMap<String,Object> Maps:CompnayFinalData) 
-			if(SlabList.contains(Maps.get("Percentage Change")+""))
-				Body=Body+"<tr><td bgcolor = \"#4CAF50\"><a href=\"https://www.google.com/finance/quote/"+Maps.get("Company ID")+":BOM?hl=en\">"+Maps.get("Company Name")+"</a></td><td bgcolor = \"#4CAF50\" >"+Maps.get("Percentage Change")+"</td></tr>";
-			else
-				Body=Body+"<tr><td><a href=\"https://www.google.com/finance/quote/"+Maps.get("Company ID")+":BOM?hl=en\">"+Maps.get("Company Name")+"</a></td><td>"+Maps.get("Percentage Change")+"</td></tr>";
+				Body=Body+"<tr><td>"+ Maps.get("Company Name")+"</td>"+
+						  "<td>"+ Maps.get("Promoters")+"</td>"+
+						  "<td>"+ Maps.get("FIIs")+"</td>"+
+						  "<td>"+ Maps.get("Mutual Funds")+"</td>"+
+						  "<td>"+ Maps.get("Insurance")+"</td>"+
+						  "<td>"+ Maps.get("Other DIIs")+"</td>"+
+						  "<td>"+ Maps.get("Non Inst.")+"</td>"+
+						  "<td>"+ Maps.get("Others")+"</td></tr>";
 
 		return CssSheet+Body+"</tbody></body></html>";
 		
@@ -184,7 +200,7 @@ public class StockPublishTest {
 		Email email = new SimpleEmail();
 		email.setHostName("smtp.googlemail.com");
 		email.setSmtpPort(465);
-		email.setAuthenticator(new DefaultAuthenticator("<GmailId>", "<GmailPassword>"));
+		email.setAuthenticator(new DefaultAuthenticator("shaik.jakeerhussain217@gmail.com", "Jakeer217786#"));
 		email.setSSLOnConnect(true);
 		email.setFrom("shaik.jakeerhussain217@gmail.com");
 		email.setSubject("Best Performing Stock");
