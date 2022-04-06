@@ -1,10 +1,15 @@
 package StockDailypublisher;
 
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
@@ -19,6 +24,8 @@ import org.testng.annotations.Test;
 
 import com.RestAssured.RestPackage.RestAssuredClass;
 import com.computaion.classes.ThreadPackage;
+
+import CredentialCoder.Coder;
 
 
 public class StockPublishTest {
@@ -179,12 +186,12 @@ public class StockPublishTest {
 	}
 	@AfterSuite(enabled=true)
 	
-	public void SendEmail() throws EmailException {
+	public void SendEmail() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, Exception {
 		
 		Email email = new SimpleEmail();
 		email.setHostName("smtp.googlemail.com");
 		email.setSmtpPort(465);
-		email.setAuthenticator(new DefaultAuthenticator("<GmailId>", "<GmailPassword>"));
+		email.setAuthenticator(new DefaultAuthenticator(Coder.Encode("AES:s+Z/a55EmCfIzeb+lqd1Gm9NeLK/9oLTG21lMHCzFS7t8I86gdhTEOzwq7/z3WAk"), Coder.decode("AES:WgTPkK8AnpvT9thJUuQgKQ==")));
 		email.setSSLOnConnect(true);
 		email.setFrom("shaik.jakeerhussain217@gmail.com");
 		email.setSubject("Best Performing Stock");
