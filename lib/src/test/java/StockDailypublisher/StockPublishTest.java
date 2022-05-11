@@ -22,10 +22,10 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.CredentialCoder.Coder;
 import com.RestAssured.RestPackage.RestAssuredClass;
 import com.computaion.classes.ThreadPackage;
 
-import CredentialCoder.Coder;
 
 
 public class StockPublishTest {

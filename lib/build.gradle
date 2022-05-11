@@ -39,7 +39,7 @@ implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', ve
 // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
 implementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '2.41.0'
 
-implementation fileTree(dir: "${rootDir}/lib/src/main/resources/jars",include:'*.jar')
+//implementation fileTree(dir: "${rootDir}/lib/src/main/resources/jars",include:'*.jar')
 
 
 }
