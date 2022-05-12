@@ -45,41 +45,41 @@ public class StockPublishTest {
 	@DataProvider(name = "paralleltest",parallel=true)
 	public Object[][] getMarketCapRange(){
 		
-		Object[][] HashMapData=new Object[7][1];
+		Object[][] HashMapData=new Object[2][1];
 		HashMap<String, Integer> Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 0);
 		Maps.put("Range2", 50);
-		HashMapData[0][0]=Maps;
+		//HashMapData[0][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 50);
 		Maps.put("Range2", 100);
-		HashMapData[1][0]=Maps;
+		//HashMapData[1][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 100);
 		Maps.put("Range2", 1000);
-		HashMapData[2][0]=Maps;
+		//HashMapData[2][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 1000);
 		Maps.put("Range2", 10000);
-		HashMapData[3][0]=Maps;
+		//HashMapData[3][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 10000);
 		Maps.put("Range2", 100000);
-		HashMapData[4][0]=Maps;
+		//HashMapData[4][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 100000);
 		Maps.put("Range2", 1000000);
-		HashMapData[5][0]=Maps;
+		HashMapData[0][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 1000000);
 		Maps.put("Range2", 0);
-		HashMapData[6][0]=Maps;
+		HashMapData[1][0]=Maps;
 		
 		return HashMapData;
 		
@@ -191,7 +191,7 @@ public class StockPublishTest {
 		Email email = new SimpleEmail();
 		email.setHostName("smtp.googlemail.com");
 		email.setSmtpPort(465);
-		email.setAuthenticator(new DefaultAuthenticator(Coder.Encode("AES:s+Z/a55EmCfIzeb+lqd1Gm9NeLK/9oLTG21lMHCzFS7t8I86gdhTEOzwq7/z3WAk"), Coder.decode("AES:WgTPkK8AnpvT9thJUuQgKQ==")));
+		email.setAuthenticator(new DefaultAuthenticator(Coder.decode("AES:s+Z/a55EmCfIzeb+lqd1Gm9NeLK/9oLTG21lMHCzFS7t8I86gdhTEOzwq7/z3WAk"), Coder.decode("AES:WgTPkK8AnpvT9thJUuQgKQ==")));
 		email.setSSLOnConnect(true);
 		email.setFrom("shaik.jakeerhussain217@gmail.com");
 		email.setSubject("Best Performing Stock");
