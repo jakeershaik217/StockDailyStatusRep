@@ -20,16 +20,7 @@ public class emailTesting {
 	
 	public void SendEmail() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, Exception {
 		
-		Email email = new SimpleEmail();
-		email.setHostName("smtp.googlemail.com");
-		email.setSmtpPort(465);
-		email.setAuthenticator(new DefaultAuthenticator(Coder.decode("AES:s+Z/a55EmCfIzeb+lqd1Gm9NeLK/9oLTG21lMHCzFS7t8I86gdhTEOzwq7/z3WAk"), Coder.decode("AES:WgTPkK8AnpvT9thJUuQgKQ==")));
-		email.setSSLOnConnect(true);
-		email.setFrom("shaik.jakeerhussain217@gmail.com");
-		email.setSubject("Best Performing Stock");
-		email.setContent("Jakeer","text/html");
-		email.addTo("shaik.jakeerhussain217@outlook.com");
-		email.send();
+		System.out.print("jakeer");
 		
 	}
 
