@@ -3,7 +3,7 @@
 <suite name="Suite" parallel="methods" data-provider-thread-count="7">
 	<test name="Test">
 		<classes>
-			<class name="StockDailypublisher.emailTesting"/>
+			<class name="StockDailypublisher.StockPublishTest"/>
 		</classes>
 	</test> <!-- Test -->
 </suite> <!-- Suite -->
