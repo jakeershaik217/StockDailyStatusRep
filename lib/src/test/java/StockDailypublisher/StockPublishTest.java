@@ -176,13 +176,13 @@ public class StockPublishTest {
 	public  String composeEmailBody() {
 		
 		List<String> SlabList=new ArrayList<>(Arrays.asList(new String[] {"4.99","4.98","5.0","9.99","10.0","19.99","20.0"}));
-		CompnayFinalData.stream().sorted((i1,i2) ->{
+		CompnayFinalData=CompnayFinalData.stream().sorted((i1,i2) ->{
 			
 			Double d1=(i1.get("Percentage Change")+"").isEmpty()?0.00:Double.parseDouble(i1.get("Percentage Change")+"");
 			Double d2=(i2.get("Percentage Change")+"").isEmpty()?0.00:Double.parseDouble(i2.get("Percentage Change")+"");
 			return (d1>d2)?-1:(d1<d2)?+1:0;
 			
-		});
+		}).collect(Collectors.toList());
 		CompnayFinalData.stream().forEach(System.out::println);
 		CompnayFinalData.stream().filter(i -> SlabList.contains(i.get("Percentage Change")+"")).collect(Collectors.toList())
 		.stream().forEach(i -> {Body=Body+"<tr><td bgcolor = \"#4CAF50\"><a href=\"https://www.google.com/finance/quote/"+i.get("Company ID")+":BOM?hl=en\">"+i.get("Company Name")+"</a></td><td bgcolor = \"#4CAF50\" >"+i.get("Percentage Change")+"</td></tr>";});
