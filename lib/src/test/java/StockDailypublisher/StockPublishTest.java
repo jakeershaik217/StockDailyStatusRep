@@ -44,7 +44,7 @@ public class StockPublishTest {
 		//CompnayAllDataList.forEach(l -> l.forEach((k,v) ->System.out.println(k+" "+v)));
 	}
 	
-	@DataProvider(name = "paralleltest",parallel=true)
+	@DataProvider(name = "paralleltest",parallel=false)
 	public Object[][] getMarketCapRange(){
 		
 		Object[][] HashMapData=new Object[7][1];
