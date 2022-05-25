@@ -36,7 +36,7 @@ public class StockPublishTest {
 	private static List<HashMap<String,Double>> CompnayPecentageList=new ArrayList<HashMap<String,Double>>();
 	private List<HashMap<String,Object>> CompnayFinalData=new ArrayList<HashMap<String,Object>>();
 	String Body="<tbody>";
-	@BeforeSuite
+	@Test(priority=-2)
 	public static void fetchAllSocksData() {
 		
 		RestAssuredClass Rs=new RestAssuredClass();
