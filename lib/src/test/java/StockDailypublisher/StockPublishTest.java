@@ -214,8 +214,7 @@ public class StockPublishTest {
 		email.setSSLOnConnect(true);
 		email.setFrom("shaik.jakeerhussain217@gmail.com");
 		email.setSubject("Best Performing Stock");
-		//email.setContent(composeEmailBody(),"text/html");
-		email.setContent("Jakeer","text/html");
+		email.setContent(composeEmailBody(),"text/html");
 		email.addTo("shaik.jakeerhussain217@outlook.com");
 		email.send();
 		
