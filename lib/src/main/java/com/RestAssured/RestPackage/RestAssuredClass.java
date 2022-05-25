@@ -50,9 +50,8 @@ public class RestAssuredClass {
     public HashMap<String,Double> getprecentageChange(int Range1,int Range2,List<HashMap<String,Object>>companyList,double Slab){
     	HashMap<String, Double> Company=new HashMap<>();
     	if(Range2==0) {
-    		System.out.println(companyList.size());
-			for(HashMap<String,Object> Maps:companyList)
-					if(Double.parseDouble((String)Maps.get("CompanyMarketCap"))>= Range1) {
+			for(HashMap<String,Object> Maps:companyList) 
+					if(!(Maps.get("CompanyMarketCap").toString()).equals("")&&Double.parseDouble((String)Maps.get("CompanyMarketCap"))>= Range1) {
 						String CompanyURL=String.format(EndPoint1, Maps.get("CompanyID"));
 						response =RestAssured.given().when().baseUri(BaseURI).get(CompanyURL);
 						String Percentage=JsonPath.read(response.getBody().asString(), CompanyPercentageChange);
@@ -61,9 +60,8 @@ public class RestAssuredClass {
 							Company.put((String)Maps.get("CompanyName"), percentageChange);
 					}
 		}else {
-			System.out.println(companyList.size());
 		for(HashMap<String,Object> Maps:companyList)
-				if(Double.parseDouble((String)Maps.get("CompanyMarketCap")) >= Range1 && Double.parseDouble((String)Maps.get("CompanyMarketCap")) < Range2){
+				if(!(Maps.get("CompanyMarketCap").toString()).equals("")&&Double.parseDouble((String)Maps.get("CompanyMarketCap")) >= Range1 && Double.parseDouble((String)Maps.get("CompanyMarketCap")) < Range2){
 					String CompanyURL=String.format(EndPoint1, Maps.get("CompanyID"));
 					response =RestAssured.given().when().baseUri(BaseURI).get(CompanyURL);
 					String Percentage=JsonPath.read(response.getBody().asString(), CompanyPercentageChange);
