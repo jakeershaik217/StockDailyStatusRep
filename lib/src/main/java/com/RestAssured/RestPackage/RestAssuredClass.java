@@ -58,7 +58,6 @@ public class RestAssuredClass {
 						double percentageChange=Double.parseDouble(Percentage);
 						if(percentageChange>=Slab)
 							Company.put((String)Maps.get("CompanyName"), percentageChange);
-						System.out.println(Company.get("CompanyName"));
 					}
 		}else {
 		for(HashMap<String,Object> Maps:companyList)
@@ -70,7 +69,6 @@ public class RestAssuredClass {
 					double percentageChange=Double.parseDouble(Percentage);
 					if(percentageChange>=Slab)
 						Company.put((String)Maps.get("CompanyName"), percentageChange);
-					System.out.println(Company.get("CompanyName"));
 					}
 				}
 		}

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.NoSuchPaddingException;
@@ -34,6 +35,7 @@ public class StockPublishTest {
 	private static List<HashMap<String,Object>> CompnayAllDataList;
 	private static List<HashMap<String,Double>> CompnayPecentageList=new ArrayList<HashMap<String,Double>>();
 	private List<HashMap<String,Object>> CompnayFinalData=new ArrayList<HashMap<String,Object>>();
+	String Body="<tbody>";
 	@BeforeSuite
 	public static void fetchAllSocksData() {
 		
@@ -45,41 +47,41 @@ public class StockPublishTest {
 	@DataProvider(name = "paralleltest",parallel=true)
 	public Object[][] getMarketCapRange(){
 		
-		Object[][] HashMapData=new Object[2][1];
+		Object[][] HashMapData=new Object[7][1];
 		HashMap<String, Integer> Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 0);
 		Maps.put("Range2", 50);
-		//HashMapData[0][0]=Maps;
+		HashMapData[0][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 50);
 		Maps.put("Range2", 100);
-		//HashMapData[1][0]=Maps;
+		HashMapData[1][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 100);
 		Maps.put("Range2", 1000);
-		//HashMapData[2][0]=Maps;
+		HashMapData[2][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 1000);
 		Maps.put("Range2", 10000);
-		//HashMapData[3][0]=Maps;
+		HashMapData[3][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 10000);
 		Maps.put("Range2", 100000);
-		//HashMapData[4][0]=Maps;
+		HashMapData[4][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 100000);
 		Maps.put("Range2", 1000000);
-		HashMapData[0][0]=Maps;
+		HashMapData[5][0]=Maps;
 		
 		Maps=new HashMap<String, Integer>();
 		Maps.put("Range1", 1000000);
 		Maps.put("Range2", 0);
-		HashMapData[1][0]=Maps;
+		HashMapData[6][0]=Maps;
 		
 		return HashMapData;
 		
@@ -172,15 +174,21 @@ public class StockPublishTest {
 			+"</tr></thead>";
 	
 	public  String composeEmailBody() {
-		String Body="<tbody>";
-		List<String> SlabList=new ArrayList<>(Arrays.asList(new String[] {"4.99","4.98","5.0","9.99","10.0","19.99","20.0"}));
 		
-		for(HashMap<String,Object> Maps:CompnayFinalData) 
+		List<String> SlabList=new ArrayList<>(Arrays.asList(new String[] {"4.99","4.98","5.0","9.99","10.0","19.99","20.0"}));
+		CompnayFinalData.stream().filter(i -> SlabList.contains(i.get("Percentage Change")+"")).collect(Collectors.toList())
+		.stream().forEach(i -> {Body=Body+"<tr><td bgcolor = \"#4CAF50\"><a href=\"https://www.google.com/finance/quote/"+i.get("Company ID")+":BOM?hl=en\">"+i.get("Company Name")+"</a></td><td bgcolor = \"#4CAF50\" >"+i.get("Percentage Change")+"</td></tr>";});
+		
+		
+		CompnayFinalData.stream().filter(i -> !SlabList.contains(i.get("Percentage Change")+"")).collect(Collectors.toList())
+		.stream().forEach(i -> {Body=Body+"<tr><td><a href=\"https://www.google.com/finance/quote/"+i.get("Company ID")+":BOM?hl=en\">"+i.get("Company Name")+"</a></td><td>"+i.get("Percentage Change")+"</td></tr>";});
+		
+	/*	for(HashMap<String,Object> Maps:CompnayFinalData) 
 			if(SlabList.contains(Maps.get("Percentage Change")+""))
 				Body=Body+"<tr><td bgcolor = \"#4CAF50\"><a href=\"https://www.google.com/finance/quote/"+Maps.get("Company ID")+":BOM?hl=en\">"+Maps.get("Company Name")+"</a></td><td bgcolor = \"#4CAF50\" >"+Maps.get("Percentage Change")+"</td></tr>";
 			else
 				Body=Body+"<tr><td><a href=\"https://www.google.com/finance/quote/"+Maps.get("Company ID")+":BOM?hl=en\">"+Maps.get("Company Name")+"</a></td><td>"+Maps.get("Percentage Change")+"</td></tr>";
-
+*/
 		return CssSheet+Body+"</tbody></body></html>";
 		
 	}
