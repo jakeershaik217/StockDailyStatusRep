@@ -201,7 +201,7 @@ public class StockPublishTest {
 		return CssSheet+Body+"</tbody></body></html>";
 		
 	}
-	@AfterSuite(enabled=true)
+	@Test(priority=5)
 	
 	public void SendEmail() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, Exception {
 		
