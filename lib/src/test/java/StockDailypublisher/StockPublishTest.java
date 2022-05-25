@@ -41,6 +41,7 @@ public class StockPublishTest {
 		
 		RestAssuredClass Rs=new RestAssuredClass();
 		CompnayAllDataList=Rs.getAllCompaniesData();
+		CompnayAllDataList.stream().forEach(System.out::println);
 		//CompnayAllDataList.forEach(l -> l.forEach((k,v) ->System.out.println(k+" "+v)));
 	}
 	
