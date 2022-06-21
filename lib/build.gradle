@@ -55,5 +55,36 @@ suites 'testng.xml'
 }
 
 
+task ShareHoldingChange(type:Test){
+useTestNG(){
+
+suites 'ShareHoldingChange.xml'
+
+}
+
+
+}
+
+task ShareAllocation(type:Test){
+useTestNG(){
+
+suites 'ShareAllocation.xml'
+
+}
+
+
+}
+
+
+task PromoterBuying(type:Test){
+useTestNG(){
+
+suites 'PromoterBuying.xml'
+
+}
+
+
+}
+
 }
 
