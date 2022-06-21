@@ -5,7 +5,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -95,7 +94,7 @@ public class StockAllocationChange{
 		
 	}
 	
-	@Test(priority=-1,dataProvider = "paralleltest",dataProviderClass = StockAllocationChange.class,enabled=true )
+	@Test(priority=-1,dataProvider = "paralleltest",dataProviderClass = StockAllocationChange.class,enabled=true,dependsOnMethods = {"fetchAllSocksData"} )
 	public static void RunTesToFectStocks(HashMap<String, Integer> Maps) throws JsonMappingException, JsonProcessingException {
 		
 		ShareHoldingPercentageChange Rs=new ShareHoldingPercentageChange();
