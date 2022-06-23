@@ -169,12 +169,11 @@ public class PromoterBuyingTest {
 	}	*/
 		
 	String Body="<tbody>";
-	for(HashMap<String,Object> Maps:PromoterBuying) 
-			Body=Body+"<tr><td><a href=\""+Maps.get("CompanyURL")+"\""+ Maps.get("CompanyName")+"</a></td>"+
+	for(HashMap<String,Object> Maps:PromoterBuying) {
+			Body=Body+"<tr><td><a href=\""+Maps.get("CompanyURL")+"\">"+ Maps.get("CompanyName")+"</a></td>"+
 					  "<td>"+ Maps.get("NumberOfShares")+"</td>"+
-					  "<td>"+ Maps.get("AmountPurchased")+"</td></tr>"  ;
+					  "<td>"+ Maps.get("AmountPurchased")+"</td></tr>"  ;}
 					
-
 	return CssSheet+Body+"</tbody></body></html>";
 		
 	}
