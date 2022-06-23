@@ -96,7 +96,7 @@ public class ShareHoldingPublisher {
 		
 	}
 	
-	@Test(priority=-1,dataProvider = "paralleltest",dataProviderClass = ShareHoldingPublisher.class,enabled=true )
+	@Test(priority=-1,dataProvider = "paralleltest",dataProviderClass = ShareHoldingPublisher.class,enabled=true,dependsOnMethods = {"fetchAllSocksData"} )
 	public static void RunTesToFectStocks(HashMap<String, Integer> Maps) throws JsonMappingException, JsonProcessingException {
 		
 		ShareHoldingChange Rs=new ShareHoldingChange();
@@ -207,7 +207,7 @@ public class ShareHoldingPublisher {
 		return CssSheet+Body+"</tbody></body></html>";
 		
 	}
-	@AfterSuite(enabled=true)
+	@AfterSuite(enabled=true,dependsOnMethods = {"RunTesToFectStocks"})
 	
 	public void SendEmail() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, Exception {
 		
