@@ -85,12 +85,13 @@ public class RestAssuredClass {
       String AmountPurchased=CommonPath+".Fld_SecurityValue";
       String NumberOfShares=CommonPath+".Fld_SecurityNo";
       String CompanyCode=CommonPath+".Fld_ScripCode";
+      String promoterBuyingURL="disclosures-insider-trading-2015/";
       
       List<HashMap<String,Object>> list=new ArrayList<HashMap<String,Object>>();
       HashMap<String, Object> Company;
   	if(Range2==0) {
 			for(HashMap<String,Object> Maps:companyList)
-					if(Double.parseDouble((String)Maps.get("CompanyMarketCap"))>= Range1) {
+					if(!((String)Maps.get("CompanyMarketCap")).isEmpty() && Double.parseDouble((String)Maps.get("CompanyMarketCap"))>= Range1) {
 						String CompanyURL=String.format(PromoterBuyingURL, Maps.get("CompanyID"));
 						response =RestAssured.given().when().baseUri(BaseURI).get(CompanyURL);
 						List<String> CompanyNames=JsonPath.read(response.getBody().asString(), CompanyName);
@@ -103,6 +104,7 @@ public class RestAssuredClass {
 							Company.put("AmountPurchased", Amount.get(i));
 							Company.put("NumberOfShares", NumberOfshares.get(i));
 							Company.put("CompanyCode", Companycode.get(i));
+							Company.put("CompanyURL", Maps.get("CompanyURL")+promoterBuyingURL);
 							System.out.println(Company);
 							list.add(Company);
 							
@@ -111,7 +113,7 @@ public class RestAssuredClass {
 					}
 		}else {
 		for(HashMap<String,Object> Maps:companyList)
-				if(Double.parseDouble((String)Maps.get("CompanyMarketCap")) >= Range1 && Double.parseDouble((String)Maps.get("CompanyMarketCap")) < Range2){
+				if(!((String)Maps.get("CompanyMarketCap")).isEmpty() && Double.parseDouble((String)Maps.get("CompanyMarketCap")) >= Range1 && Double.parseDouble((String)Maps.get("CompanyMarketCap")) < Range2){
 					String CompanyURL=String.format(PromoterBuyingURL, Maps.get("CompanyID"));
 					response =RestAssured.given().when().baseUri(BaseURI).get(CompanyURL);
 					List<String> CompanyNames=JsonPath.read(response.getBody().asString(), CompanyName);
@@ -124,6 +126,7 @@ public class RestAssuredClass {
 						Company.put("AmountPurchased", Amount.get(i));
 						Company.put("NumberOfShares", NumberOfshares.get(i));
 						Company.put("CompanyCode", Companycode.get(i));
+						Company.put("CompanyURL", Maps.get("CompanyURL")+promoterBuyingURL);
 						System.out.println(Company);
 						list.add(Company);
 						
