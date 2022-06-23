@@ -45,7 +45,7 @@ public class ShareHoldingPublisher {
 	private static List<HashMap<String,Object>> CompnayAllDataList;
 	private static List<HashMap<String,Map<String,Double>>> CompnayPecentageList=new ArrayList<HashMap<String,Map<String,Double>>>();
 	public List<HashMap<String,Object>> CompnayFinalData=new ArrayList<HashMap<String,Object>>();
-	@BeforeSuite
+	@Test(priority=-2)
 	public static void fetchAllSocksData() {
 		
 		RestAssuredClass Rs=new RestAssuredClass();
@@ -207,7 +207,7 @@ public class ShareHoldingPublisher {
 		return CssSheet+Body+"</tbody></body></html>";
 		
 	}
-	@AfterSuite(enabled=true,dependsOnMethods = {"RunTesToFectStocks"})
+	@Test(priority=5,enabled=true,dependsOnMethods = {"RunTesToFectStocks"})
 	
 	public void SendEmail() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, Exception {
 		
