@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.NoSuchPaddingException;
@@ -120,8 +121,22 @@ public class StockAllocationChange{
 					dummyMap.put("Others", MapsPercentage.get(Key).get("Others"));
 					CompnayFinalData.add(dummyMap);
 					}
-		Collections.sort(CompnayFinalData,new comparatorClass());
-		Collections.sort(CompnayFinalData,new comparatorClass2());
+		CompnayFinalData=CompnayFinalData.stream().sorted((i1,i2) -> {
+			
+
+			
+			double d1= Double.parseDouble(i1.get("FIIs")+"");
+			double d2= Double.parseDouble(i2.get("FIIs")+"");
+			if(d1>d2)
+				return -1;
+			else if(d1<d2)
+				return 1;
+			else
+				return 0;
+		
+		}).collect(Collectors.toList());
+		//Collections.sort(CompnayFinalData,new comparatorClass());
+		//Collections.sort(CompnayFinalData,new comparatorClass2());
 				  
 	}
 	
