@@ -206,7 +206,7 @@ public class StockAllocationChange{
 		return CssSheet+Body+"</tbody></body></html>";
 		
 	}
-	@Test(priority=5)
+	@Test(priority=5,dependsOnMethods = {"RunTesToFectStocks"} )
 	
 	public void SendEmail() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, Exception {
 		

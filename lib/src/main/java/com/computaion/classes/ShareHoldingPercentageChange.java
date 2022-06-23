@@ -20,7 +20,7 @@ public class ShareHoldingPercentageChange{
 		HashMap<String,Map<String,Object>> FinalDataMap=new HashMap<String,Map<String,Object>>();
 		if(Range2==0) {
 			for(HashMap<String,Object> Maps:companyList)
-					if(Double.parseDouble((String)Maps.get("CompanyMarketCap"))>= Range1) {
+					if(!((String)Maps.get("CompanyName")).equals("") && Double.parseDouble((String)Maps.get("CompanyMarketCap"))>= Range1) {
 						String CompanyURL=String.format(EndPoint, Maps.get("CompanyID"));
 						Response response=RestAssured.given().when().get(CompanyURL);
 						String ResponseString=response.getBody().asString();
@@ -57,7 +57,7 @@ public class ShareHoldingPercentageChange{
 					}
 		}else {
 		for(HashMap<String,Object> Maps:companyList)
-				if(Double.parseDouble((String)Maps.get("CompanyMarketCap")) >= Range1 && Double.parseDouble((String)Maps.get("CompanyMarketCap")) < Range2){
+				if(!((String)Maps.get("CompanyName")).equals("") && Double.parseDouble((String)Maps.get("CompanyMarketCap")) >= Range1 && Double.parseDouble((String)Maps.get("CompanyMarketCap")) < Range2){
 					String CompanyURL=String.format(EndPoint, Maps.get("CompanyID"));
 					Response response=RestAssured.given().when().get(CompanyURL);
 					String ResponseString=response.getBody().asString();
