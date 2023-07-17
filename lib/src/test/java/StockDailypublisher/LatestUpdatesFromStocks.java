@@ -247,16 +247,17 @@ public class LatestUpdatesFromStocks {
 	public void SendEmail() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			BadPaddingException, Exception {
 		final String usernameEncode = "AES:s+Z/a55EmCfIzeb+lqd1GkgjlN/U1ueW8d+tJ+A/wIP8PBRQk405qLZksNhoD5tl";
-		final String passwordEncode = "AES:YiJe10c7B36A9kpNBgb03w==";
+                final String passwordEncode = "AES:YiJe10c7B36A9kpNBgb03w==";
 
-		final String UserName = Coder.decode(usernameEncode);
-		final String PassWord = Coder.decode(passwordEncode);
+                final String UserName = Coder.decode(usernameEncode);
+                final String PassWord = Coder.decode(passwordEncode);
 
-		Properties props = new Properties();
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.starttls.enable", "true");
-		props.put("mail.smtp.host", "smtp.office365.com");
-		props.put("mail.smtp.port", "587");
+                Properties props = new Properties();
+                props.put("mail.smtp.auth", "true");
+                props.put("mail.smtp.starttls.enable", "true");
+                props.put("mail.smtp.host", "smtp-mail.outlook.com");
+                props.put("mail.smtp.port", "587");
+                props.put("mail.debug", "true");
 
 		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
