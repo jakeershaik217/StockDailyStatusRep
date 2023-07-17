@@ -282,6 +282,7 @@ public class LatestUpdatesFromStocks {
 			message.setSubject("Stock News -  BuyBack,Divident,Bounus " + date);
 			message.saveChanges();
 			Transport.send(message);
+			
 
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
