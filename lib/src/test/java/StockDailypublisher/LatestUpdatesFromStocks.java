@@ -54,7 +54,8 @@ public class LatestUpdatesFromStocks {
 	private static List<HashMap<String, Object>> CompnayAllDataList;
 	private static int NumberOfColumns = 6;
 	private static String SheetName = "CompanyData";
-	private static String ExcelDataBasePath=System.getProperty("user.dir")+"\\src\\test\\resources\\Database.xlsx";
+	//private static String ExcelDataBasePath=System.getProperty("user.dir")+"\\src\\test\\resources\\Database.xlsx";
+	private static String ExcelDataBasePath="src/test/resources/Database.xlsx";
 	private static List<HashMap<String, HashMap<String, String>>> CompnayDataList = new ArrayList<HashMap<String, HashMap<String, String>>>();
 	private static List<HashMap<String, HashMap<String, String>>> CompnayDataListClone = new ArrayList<HashMap<String, HashMap<String, String>>>();
 	private static List<HashMap<String, String>> CompnayDataCustm = new ArrayList<>();
