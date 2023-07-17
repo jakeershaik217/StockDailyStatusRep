@@ -23,7 +23,8 @@ public class ExcelUtility {
 	private String ExcelDataBasePath;
 	
 	public ExcelUtility(String fileName,String SheetName) throws IOException{
-		file=new File(fileName);
+		file=Paths.get(fileName).toFile();
+		Fin=new FileInputStream(file);
 		Fin=new FileInputStream(file);
 		workbook=new XSSFWorkbook(Fin);	
 		sheet=workbook.getSheet(SheetName);
