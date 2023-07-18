@@ -32,6 +32,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import org.apache.poi.EmptyFileException;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -56,7 +57,6 @@ public class LatestUpdatesFromStocks {
 	private static String SheetName = "CompanyData";
 	//private static String ExcelDataBasePath=System.getProperty("user.dir")+"\\src\\test\\resources\\Database.xlsx";
 	private static String ExcelDataBasePath="src/test/resources/Database.xlsx";
-
 	private static List<HashMap<String, HashMap<String, String>>> CompnayDataList = new ArrayList<HashMap<String, HashMap<String, String>>>();
 	private static List<HashMap<String, HashMap<String, String>>> CompnayDataListClone = new ArrayList<HashMap<String, HashMap<String, String>>>();
 	private static List<HashMap<String, String>> CompnayDataCustm = new ArrayList<>();
@@ -248,16 +248,24 @@ public class LatestUpdatesFromStocks {
 	public void SendEmail() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			BadPaddingException, Exception {
 		final String usernameEncode = "AES:s+Z/a55EmCfIzeb+lqd1GkgjlN/U1ueW8d+tJ+A/wIP8PBRQk405qLZksNhoD5tl";
-		final String passwordEncode = "AES:YiJe10c7B36A9kpNBgb03w==";
+                final String passwordEncode = "AES:YiJe10c7B36A9kpNBgb03w==";
 
-		final String UserName = Coder.decode(usernameEncode);
-		final String PassWord = Coder.decode(passwordEncode);
+                final String UserName = Coder.decode(usernameEncode);
+                final String PassWord = Coder.decode(passwordEncode);
 
-		Properties props = new Properties();
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.starttls.enable", "true");
-		props.put("mail.smtp.host", "smtp.office365.com");
-		props.put("mail.smtp.port", "587");
+                Properties props = new Properties();
+                props.put("mail.smtp.auth", "true");
+                props.put("mail.smtp.starttls.enable", "true");
+                props.put("mail.smtp.host", "smtp.office365.com");
+                props.put("mail.smtp.port", "587");
+		props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		props.put("mail.smtp.ssl.trust", "smtp.office365.com");
+                props.put("mail.debug", "true");
+		props.put("mail.smtp.socketFactory.port", "587");
+
+
+		
+		
 
 		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
@@ -283,6 +291,7 @@ public class LatestUpdatesFromStocks {
 			message.setSubject("Stock News -  BuyBack,Divident,Bounus " + date);
 			message.saveChanges();
 			Transport.send(message);
+			
 
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);

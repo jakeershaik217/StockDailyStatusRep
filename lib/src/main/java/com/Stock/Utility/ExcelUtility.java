@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 
+import org.apache.poi.EmptyFileException;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -24,13 +25,60 @@ public class ExcelUtility {
 	private String ExcelDataBasePath;
 	
 	public ExcelUtility(String fileName,String SheetName) throws IOException{
-		
+        try {
 		file=Paths.get(fileName).toFile();
 		Fin=new FileInputStream(file);
 		workbook=new XSSFWorkbook(Fin);	
 		sheet=workbook.getSheet(SheetName);
 		ExcelDataBasePath=fileName;
+        }catch(EmptyFileException e) {
+        	
+        	Fin.close();
+        	Paths.get(fileName).toFile().delete();
+    		workbook=new XSSFWorkbook();	
+    		sheet=workbook.createSheet(SheetName);
+    		sheet.createRow(0).createCell(0).setCellValue("CompanyName");
+    		sheet.getRow(0).createCell(1).setCellValue("Board Meeting Outcome");
+    		sheet.getRow(0).createCell(2).setCellValue("Dividend");
+    		sheet.getRow(0).createCell(3).setCellValue("Buyback");
+    		sheet.getRow(0).createCell(4).setCellValue("Bounus");
+    		sheet.getRow(0).createCell(5).setCellValue("Date");
+    		try (FileOutputStream outputStream = new FileOutputStream(fileName)) {
+                workbook.write(outputStream);
+                System.out.println("File created successfully at " + fileName);
+                workbook.close();
+                outputStream.close();
+                
+            } catch (IOException e1) {
+                e.printStackTrace();
+            }
+    		
+    		ExcelDataBasePath=fileName;
+        	
+        }catch(FileNotFoundException e) {
+        	
+        	workbook=new XSSFWorkbook();	
+    		sheet=workbook.createSheet(SheetName);
+    		sheet.createRow(0).createCell(0).setCellValue("CompanyName");
+    		sheet.getRow(0).createCell(1).setCellValue("Board Meeting Outcome");
+    		sheet.getRow(0).createCell(2).setCellValue("Dividend");
+    		sheet.getRow(0).createCell(3).setCellValue("Buyback");
+    		sheet.getRow(0).createCell(4).setCellValue("Bounus");
+    		sheet.getRow(0).createCell(5).setCellValue("Date");
+    		try (FileOutputStream outputStream = new FileOutputStream(fileName)) {
+                workbook.write(outputStream);
+                System.out.println("File created successfully at " + fileName);
+                workbook.close();
+                outputStream.close();
+            } catch (IOException e1) {
+                e.printStackTrace();
+            }
+    		
+    		ExcelDataBasePath=fileName;
+        }
 	}
+	
+	
 	
 	public List<HashMap<String,String>> readExcel() throws FileNotFoundException{
 		
