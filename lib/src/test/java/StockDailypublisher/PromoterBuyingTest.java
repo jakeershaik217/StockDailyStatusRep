@@ -1,7 +1,5 @@
 package StockDailypublisher;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,8 +10,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.NoSuchPaddingException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -30,8 +26,8 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.CredentialCoder.Coder;
 import com.RestAssured.RestPackage.RestAssuredClass;
+import com.Stock.Utility.SmtpConfiguration;
 import com.computaion.classes.ThreadPackage;
 
 public class PromoterBuyingTest {
@@ -179,14 +175,10 @@ public class PromoterBuyingTest {
 	}
 	
 	@Test(priority=5,enabled=true,dependsOnMethods = {"RunTesToFectStocks"})
-		public void SendEmail() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, Exception {
+		public void SendEmail() {
 			
 
-		final String usernameEncode = "AES:s+Z/a55EmCfIzeb+lqd1GkgjlN/U1ueW8d+tJ+A/wIP8PBRQk405qLZksNhoD5tl";
-        final String passwordEncode = "AES:YiJe10c7B36A9kpNBgb03w==";
-	        
-	        final String UserName=Coder.decode(usernameEncode);
-	        final String PassWord=Coder.decode(passwordEncode);
+	        final SmtpConfiguration smtp = SmtpConfiguration.fromEnvironment();
 
 	        
 
@@ -199,7 +191,7 @@ public class PromoterBuyingTest {
 	        Session session = Session.getInstance(props,
 	          new javax.mail.Authenticator() {
 	            protected PasswordAuthentication getPasswordAuthentication() {
-	                return new PasswordAuthentication(UserName, PassWord);
+	                return new PasswordAuthentication(smtp.getUsername(), smtp.getPassword());
 	            }
 	          });
 
@@ -207,9 +199,9 @@ public class PromoterBuyingTest {
 
 	            Message message = new MimeMessage(session);
 	            Multipart multipart = new MimeMultipart( "alternative" );
-	            message.setFrom(new InternetAddress("shaik.jakeerhussain217@outlook.com"));
+	            message.setFrom(new InternetAddress(smtp.getUsername()));
 	            message.setRecipients(Message.RecipientType.TO,
-	                InternetAddress.parse("shaik.jakeerhussain217@outlook.com,shaikyounusshaik2@gmail.com"));
+	                InternetAddress.parse(smtp.getRecipients()));
 	            MimeBodyPart htmlPart = new MimeBodyPart();
 	            htmlPart.setContent(getAllDataAboutCompnay(), "text/html; charset=utf-8" );
 

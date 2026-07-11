@@ -1,8 +1,6 @@
 package StockDailypublisher;
 
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,8 +12,6 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.NoSuchPaddingException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -30,8 +26,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.CredentialCoder.Coder;
 import com.RestAssured.RestPackage.RestAssuredClass;
+import com.Stock.Utility.SmtpConfiguration;
 import com.Stock.Utility.StaticVariableCollection;
 import com.computaion.classes.ThreadPackage;
 
@@ -122,12 +118,8 @@ public class ResultsDay {
 	}
 	@Test(priority=5)
 	
-	public void SendEmail() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, Exception {
-		final String usernameEncode = "AES:s+Z/a55EmCfIzeb+lqd1GkgjlN/U1ueW8d+tJ+A/wIP8PBRQk405qLZksNhoD5tl";
-        final String passwordEncode = "AES:YiJe10c7B36A9kpNBgb03w==";
-        
-        final String UserName=Coder.decode(usernameEncode);
-        final String PassWord=Coder.decode(passwordEncode);
+	public void SendEmail() {
+        final SmtpConfiguration smtp = SmtpConfiguration.fromEnvironment();
 
         
 
@@ -140,7 +132,7 @@ public class ResultsDay {
         Session session = Session.getInstance(props,
           new javax.mail.Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(UserName, PassWord);
+                return new PasswordAuthentication(smtp.getUsername(), smtp.getPassword());
             }
           });
 
@@ -148,9 +140,9 @@ public class ResultsDay {
 
             Message message = new MimeMessage(session);
             Multipart multipart = new MimeMultipart( "alternative" );
-            message.setFrom(new InternetAddress("shaik.jakeerhussain217@outlook.com"));
+            message.setFrom(new InternetAddress(smtp.getUsername()));
             message.setRecipients(Message. RecipientType.TO,
-                InternetAddress.parse("shaik.jakeerhussain217@outlook.com,shaikyounusshaik2@gmail.com"));
+                InternetAddress.parse(smtp.getRecipients()));
             MimeBodyPart htmlPart = new MimeBodyPart();
             htmlPart.setContent( composeEmailBody(), "text/html; charset=utf-8" );
 

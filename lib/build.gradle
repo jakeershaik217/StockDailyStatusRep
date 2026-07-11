@@ -18,55 +18,33 @@ repositories {
 }
 
 dependencies {
-    // https://mvnrepository.com/artifact/io.rest-assured/rest-assured
-implementation group: 'io.rest-assured', name: 'rest-assured', version: '4.5.0'
-// https://mvnrepository.com/artifact/io.rest-assured/json-path
-implementation group: 'io.rest-assured', name: 'json-path', version: '4.5.0'
-// https://mvnrepository.com/artifact/io.rest-assured/json-schema-validator
-implementation group: 'io.rest-assured', name: 'json-schema-validator', version: '4.5.0'
-// https://mvnrepository.com/artifact/io.rest-assured/xml-path
-implementation group: 'io.rest-assured', name: 'xml-path', version: '4.5.0'
-// https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path
-implementation group: 'com.jayway.jsonpath', name: 'json-path', version: '2.6.0'
-// https://mvnrepository.com/artifact/org.apache.commons/commons-email
-implementation group: 'org.apache.commons', name: 'commons-email', version: '1.5'
-// https://mvnrepository.com/artifact/org.testng/testng
-implementation group: 'org.testng', name: 'testng', version: '6.14.3'
-// https://mvnrepository.com/artifact/org.jsoup/jsoup
-implementation group: 'org.jsoup', name: 'jsoup', version: '1.7.2'
-// https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.1'
-// https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
-implementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '2.41.0'
-// https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox
-implementation 'org.apache.pdfbox:pdfbox:2.0.23'
-// https://mvnrepository.com/artifact/org.apache.pdfbox/fontbox
-//implementation 'org.apache.pdfbox:fontbox:2.0.21'
-// https://mvnrepository.com/artifact/commons-logging/commons-logging
-implementation 'commons-logging:commons-logging:1.2'
-// https://mvnrepository.com/artifact/org.jsoup/jsoup
-implementation 'org.jsoup:jsoup:1.15.3'
-// https://mvnrepository.com/artifact/com.google.code.gson/gson
-implementation 'com.google.code.gson:gson:2.10'
-// https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.2'
-// https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
-implementation 'org.seleniumhq.selenium:selenium-java:3.141.59'
-// https://mvnrepository.com/artifact/org.apache.poi/poi
-implementation group: 'org.apache.poi', name: 'poi', version: '5.2.3'
-// https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
-implementation 'org.apache.poi:poi-ooxml:5.2.1'
-// https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
-implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
+    implementation platform('com.fasterxml.jackson:jackson-bom:2.21.4')
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.google.code.gson:gson:2.13.1'
+    implementation 'com.jayway.jsonpath:json-path:2.9.0'
+    implementation 'commons-logging:commons-logging:1.3.5'
+    implementation 'io.rest-assured:json-path:5.5.6'
+    implementation 'io.rest-assured:json-schema-validator:5.5.6'
+    implementation 'io.rest-assured:rest-assured:5.5.6'
+    implementation 'io.rest-assured:xml-path:5.5.6'
+    implementation 'org.apache.commons:commons-email:1.6.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.25.4'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.36'
+    implementation 'org.apache.poi:poi:5.5.1'
+    implementation 'org.apache.poi:poi-ooxml:5.5.1'
+    implementation 'org.jsoup:jsoup:1.22.2'
+    implementation 'org.seleniumhq.selenium:selenium-java:4.45.0'
+    implementation 'org.testng:testng:7.12.0'
 
-
-
-
-
-
-//implementation fileTree(dir: "${rootDir}/lib/src/main/resources/jars",include:'*.jar')
-
-
+    constraints {
+        implementation('com.google.guava:guava:33.6.0-jre')
+        implementation('com.sun.mail:jakarta.mail:1.6.8')
+        implementation('commons-io:commons-io:2.20.0')
+        implementation('net.minidev:json-smart:2.5.2')
+        implementation('org.apache.commons:commons-compress:1.28.0')
+        implementation('org.apache.commons:commons-lang3:3.19.0')
+        implementation('org.mozilla:rhino:1.9.1')
+    }
 }
 
 task DailyRun(type:Test){
@@ -122,4 +100,3 @@ suites 'LatestUpdatesFromStocks.xml'
 }
 
 }
-
