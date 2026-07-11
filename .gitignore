@@ -6,3 +6,7 @@ build
 lib/bin/
 lib/test-output/
 lib/build/
+
+# Ignore local secret files
+.env
+.env.*
