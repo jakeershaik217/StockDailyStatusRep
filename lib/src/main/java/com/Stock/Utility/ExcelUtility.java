@@ -10,6 +10,7 @@ import java.util.*;
 
 import org.apache.poi.EmptyFileException;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -23,8 +24,10 @@ public class ExcelUtility {
 	private XSSFRow      row;
 	private File         file;
 	private String ExcelDataBasePath;
+	private String sheetName;
 	
 	public ExcelUtility(String fileName,String SheetName) throws IOException{
+		this.sheetName=SheetName;
         try {
 		file=Paths.get(fileName).toFile();
 		Fin=new FileInputStream(file);
@@ -50,7 +53,7 @@ public class ExcelUtility {
                 outputStream.close();
                 
             } catch (IOException e1) {
-                e.printStackTrace();
+                throw new IOException("Failed to create Excel database file at " + fileName, e1);
             }
     		
     		ExcelDataBasePath=fileName;
@@ -71,7 +74,7 @@ public class ExcelUtility {
                 workbook.close();
                 outputStream.close();
             } catch (IOException e1) {
-                e.printStackTrace();
+                throw new IOException("Failed to create Excel database file at " + fileName, e1);
             }
     		
     		ExcelDataBasePath=fileName;
@@ -85,21 +88,25 @@ public class ExcelUtility {
 		HashMap<String, String> DataMap;
 		List<HashMap<String,String>> DataMapList=new ArrayList<>();
 		if(sheet==null)
-			throw new FileNotFoundException("Sheet :"+sheet.getSheetName()+" is not visible/Accessible");
+			throw new FileNotFoundException("Sheet :"+sheetName+" is not visible/Accessible");
 		
 		int totalRowCount=sheet.getLastRowNum()+1;
-		int totalColumnCount=sheet.getRow(0).getLastCellNum();
-	try {
+		XSSFRow headerRow=sheet.getRow(0);
+		int totalColumnCount=headerRow.getLastCellNum();
 		for(int i=1;i<totalRowCount;i++) {
+			XSSFRow dataRow=sheet.getRow(i);
+			if(dataRow==null)
+				continue;
 			DataMap=new HashMap<>();
 			for(int j=0;j<totalColumnCount;j++) {
-				DataMap.put(sheet.getRow(0).getCell(j).getStringCellValue(), sheet.getRow(i).getCell(j).getStringCellValue());
-			
-			}DataMapList.add(DataMap);
+				XSSFCell headerCell=headerRow.getCell(j);
+				XSSFCell dataCell=dataRow.getCell(j);
+				if(headerCell==null || dataCell==null)
+					continue;
+				DataMap.put(headerCell.getStringCellValue(), dataCell.getStringCellValue());
+			}
+			DataMapList.add(DataMap);
 		}
-	}catch(NullPointerException n) {
-		
-	}
 		
 		return DataMapList;
 	}
@@ -109,20 +116,21 @@ public class ExcelUtility {
 		
 		List<String> DataMap=new ArrayList<>();
 		if(sheet==null)
-			throw new FileNotFoundException("Sheet :"+sheet.getSheetName()+" is not visible/Accessible");
+			throw new FileNotFoundException("Sheet :"+sheetName+" is not visible/Accessible");
 		
 		int totalRowCount=sheet.getLastRowNum()+1;
 		int totalColumnCount=sheet.getRow(0).getLastCellNum();
-	try {
-		for(int i=1;i<totalRowCount;i++) 
-			for(int j=0;j<totalColumnCount;j++) 
-				DataMap.add(sheet.getRow(i).getCell(j).getStringCellValue());
-			
-			
-		
-	}catch(NullPointerException n) {
-		
-	}
+		for(int i=1;i<totalRowCount;i++) {
+			XSSFRow dataRow=sheet.getRow(i);
+			if(dataRow==null)
+				continue;
+			for(int j=0;j<totalColumnCount;j++) {
+				XSSFCell dataCell=dataRow.getCell(j);
+				if(dataCell==null)
+					continue;
+				DataMap.add(dataCell.getStringCellValue());
+			}
+		}
 		
 		return DataMap;
 	}
@@ -212,11 +220,15 @@ public class ExcelUtility {
 	}	
 	
 	public String getDateFromExcelDatabase() {
-		try {
-		return sheet.getRow(1).getCell(5).getStringCellValue();
-		}catch(Exception e) {
+		if(sheet==null)
 			return "";
-		}
+		XSSFRow row=sheet.getRow(1);
+		if(row==null)
+			return "";
+		XSSFCell cell=row.getCell(5);
+		if(cell==null)
+			return "";
+		return cell.getStringCellValue();
 	}
 
 }
