@@ -38,6 +38,8 @@ DEFAULT_API_KEY = "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b"
 
 REPO_ROOT = Path(__file__).resolve().parent
 HISTORY_FILE = REPO_ROOT / "history" / "maize_prices.csv"
+TRANSLATION_CACHE = REPO_ROOT / "history" / "headlines_te.json"
+TRANSLATE_URL = "https://translate.googleapis.com/translate_a/single"
 
 # Markets that actually set the price for an Andhra Pradesh seller.
 AP_BENCHMARK_MARKETS = [
@@ -353,11 +355,60 @@ def fetch_news(days: int = 8) -> dict:
             if pub < cutoff:
                 continue
             title = html.unescape(re.sub(r"<[^>]+>", "", title_m.group(1))).strip()
-            items.append({"title": title, "date": pub.strftime("%d %b")})
+            # Google appends " - Publisher"; keep the outlet out of the translation.
+            head, sep, source = title.rpartition(" - ")
+            if not sep:
+                head, source = title, ""
+            items.append({"title": head, "source": source,
+                          "date": pub.strftime("%d %b"),
+                          "date_te": f"{pub.day} {MONTHS_TE[pub.month - 1]}"})
             if len(items) >= 5:
                 break
         results[label] = items
     return results
+
+
+def translate_te(text: str, cache: dict) -> str:
+    """Translate one headline to Telugu, or return "" if the service is unavailable.
+
+    Headlines are cached in history/headlines_te.json - the same story turns up
+    across weeks, and the endpoint is unauthenticated and worth being gentle with.
+    """
+    if text in cache:
+        return cache[text]
+    params = urllib.parse.urlencode({"client": "gtx", "sl": "en", "tl": "te",
+                                     "dt": "t", "q": text})
+    try:
+        payload = _get_json(f"{TRANSLATE_URL}?{params}", timeout=20, attempts=2)
+        out = "".join(seg[0] for seg in payload[0] if seg and seg[0])
+    except Exception:
+        return ""
+    cache[text] = out
+    return out
+
+
+def attach_te_titles(news: dict) -> None:
+    """Fill item["title_te"] for every headline, in place."""
+    cache = {}
+    if TRANSLATION_CACHE.exists():
+        try:
+            cache = json.loads(TRANSLATION_CACHE.read_text(encoding="utf-8"))
+        except (ValueError, OSError):
+            cache = {}
+    before, failures = len(cache), 0
+    for items in news.values():
+        for item in items:
+            item["title_te"] = translate_te(item["title"], cache)
+            if not item["title_te"]:
+                failures += 1
+    if failures:
+        print(f"  warning: {failures} headline(s) could not be translated",
+              file=sys.stderr)
+    if len(cache) != before:
+        TRANSLATION_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        TRANSLATION_CACHE.write_text(
+            json.dumps(cache, ensure_ascii=False, indent=1, sort_keys=True),
+            encoding="utf-8")
 
 
 # --------------------------------------------------------------------------
@@ -537,14 +588,20 @@ def render_markdown(ctx: dict, lang: str = "en") -> str:
                      else "News scan (last 8 days)"))
         a("")
         if te:
-            a("*శీర్షికలు ప్రచురణకర్తలు ఇచ్చిన ఆంగ్ల రూపంలోనే ఉంచాము.*")
+            a("*శీర్షికలను తెలుగులో ఇచ్చాము. పక్కన వాలు అక్షరాలలో ఉన్నది అసలు ఆంగ్ల "
+              "శీర్షిక - ఆ వార్తను వెతకడానికి అది ఉపయోగపడుతుంది.*")
             a("")
         for label, items in ctx["news"].items():
             if not items:
                 continue
             a(f"**{NEWS_LABELS_TE.get(label, label) if te else label}**")
             for item in items:
-                a(f"- {item['title']} ({item['date']})")
+                if te:
+                    head = item.get("title_te") or item["title"]
+                    a(f"- {head} - {item['source']} ({item['date_te']}) · "
+                      f"*{item['title']}*")
+                else:
+                    a(f"- {item['title']} - {item['source']} ({item['date']})")
             a("")
 
     a("---")
@@ -810,9 +867,13 @@ def main() -> int:
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
 
+    langs = [l.strip() for l in args.lang.split(",") if l.strip()]
+    if "te" in langs and ctx["news"]:
+        attach_te_titles(ctx["news"])
+
     # One self-contained document per language, and one email each - a single
     # bilingual message buries whichever language you actually read.
-    for lang in [l.strip() for l in args.lang.split(",") if l.strip()]:
+    for lang in langs:
         md = render_markdown(ctx, lang)
         html_doc = markdown_to_html(md)
         stem = f"ap-maize-brief-{ctx['run_date']}-{lang}"

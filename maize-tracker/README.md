@@ -31,7 +31,13 @@ each with its own subject line. It is not a single bilingual message.
 
 Market, district and variety names arrive from the API in English and are
 transliterated via `TRANSLIT_TE`; unmapped names are left as they came rather
-than guessed at. News headlines stay in the publisher's original English.
+than guessed at.
+
+News headlines are machine-translated through Google's public translate endpoint
+and cached in `history/headlines_te.json`, with the original English kept in
+italics after each one so the article is still searchable. If the endpoint is
+unreachable the Telugu brief falls back to the English headline and warns on
+stderr rather than failing the run.
 
 ## Running it
 
