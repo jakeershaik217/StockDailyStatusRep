@@ -120,6 +120,43 @@ SCENARIOS = [
      20, 2200, 2450, 2350),
 ]
 
+# Market, district and variety names arrive from the API in English. Transliterate
+# the ones that actually show up in the southern maize feed; anything unmapped is
+# left as it came, which is better than a wrong guess at a place name.
+TRANSLIT_TE = {
+    # AP markets
+    "Kurnool": "కర్నూలు", "Panyam": "పాణ్యం", "Nandyal": "నంద్యాల",
+    "Bapatla": "బాపట్ల", "Parchur": "పర్చూరు", "Ipur": "ఇపూరు",
+    "Mylavaram": "మైలవరం", "Rajanagaram": "రాజానగరం", "Bhimunipatnam": "భీమునిపట్నం",
+    "Ponduru": "పొందూరు", "Simhadhripuram": "సింహాద్రిపురం", "Guntur": "గుంటూరు",
+    "Chittoor": "చిత్తూరు", "Tadepalligudem": "తాడేపల్లిగూడెం", "Palakonda": "పాలకొండ",
+    "Vinukonda": "వినుకొండ", "Duggirala": "దుగ్గిరాల", "Podili": "పొదిలి",
+    # Telangana markets
+    "Nizamabad": "నిజామాబాద్", "Jagtial": "జగిత్యాల", "Karimnagar": "కరీంనగర్",
+    "Warangal": "వరంగల్", "Siddipet": "సిద్దిపేట", "Bejjenki": "బెజ్జంకి",
+    # Districts
+    "Visakhapatnam": "విశాఖపట్నం", "NTR": "ఎన్టీఆర్", "YSR": "వైఎస్సార్",
+    "Kadapa": "కడప", "Krishna": "కృష్ణా", "Prakasam": "ప్రకాశం",
+    "Srikakulam": "శ్రీకాకుళం", "Anantapur": "అనంతపురం", "Vizianagaram": "విజయనగరం",
+    "Palnadu": "పల్నాడు", "Eluru": "ఏలూరు", "Kakinada": "కాకినాడ",
+    "Konaseema": "కోనసీమ", "Annamayya": "అన్నమయ్య", "Tirupati": "తిరుపతి",
+    "Nellore": "నెల్లూరు", "Anakapalli": "అనకాపల్లి", "Manyam": "మన్యం",
+    "Parvathipuram": "పార్వతీపురం", "Godavari": "గోదావరి", "East": "తూర్పు",
+    "West": "పశ్చిమ", "Sri": "శ్రీ", "Sathya": "సత్యసాయి", "Sai": "",
+    # Varieties
+    "Hybrid": "హైబ్రిడ్", "Local": "లోకల్", "Yellow": "పసుపు", "White": "తెలుపు",
+    "Red": "ఎరుపు", "Deshi": "దేశీ", "Cattle": "పశువుల", "Feed": "దాణా",
+    "Medium": "మధ్యస్థం", "Other": "ఇతర", "Maize": "మొక్కజొన్న",
+    "APMC": "మార్కెట్",
+}
+_TRANSLIT_RE = re.compile(r"\b(" + "|".join(sorted(TRANSLIT_TE, key=len, reverse=True)) + r")\b")
+
+
+def te_name(text: str) -> str:
+    """Transliterate the English tokens in a market, district or variety name."""
+    return " ".join(_TRANSLIT_RE.sub(lambda m: TRANSLIT_TE[m.group(1)], text).split())
+
+
 MONTHS_TE = ["జనవరి", "ఫిబ్రవరి", "మార్చి", "ఏప్రిల్", "మే", "జూన్",
              "జూలై", "ఆగస్టు", "సెప్టెంబర్", "అక్టోబర్", "నవంబర్", "డిసెంబర్"]
 
@@ -349,11 +386,11 @@ def _msp_line(ctx, lang):
         return (f"Rs {abs(gap):,.0f} below MSP - distress territory, watch for "
                 f"procurement demands from AP and Telangana")
     if state == "above":
-        return f"MSP కంటే ₹{gap:,.0f} ఎక్కువ - ఇథనాల్ కొనుగోళ్లే ధరను నిలబెడుతున్నాయి"
+        return f"కనీస మద్దతు ధర కంటే ₹{gap:,.0f} ఎక్కువ - ఇథనాల్ కొనుగోళ్లే ధరను నిలబెడుతున్నాయి"
     if state == "parity":
-        return (f"MSP కంటే ₹{abs(gap):,.0f} {'ఎక్కువ' if gap >= 0 else 'తక్కువ'} - "
+        return (f"కనీస మద్దతు ధర కంటే ₹{abs(gap):,.0f} {'ఎక్కువ' if gap >= 0 else 'తక్కువ'} - "
                 f"దాదాపు సమాన స్థాయిలో")
-    return (f"MSP కంటే ₹{abs(gap):,.0f} తక్కువ - రైతులకు నష్టదాయక స్థాయి, ఏపీ మరియు "
+    return (f"కనీస మద్దతు ధర కంటే ₹{abs(gap):,.0f} తక్కువ - రైతులకు నష్టదాయక స్థాయి, ఏపీ మరియు "
             f"తెలంగాణ నుంచి సేకరణ డిమాండ్లు రావచ్చు")
 
 
@@ -430,16 +467,18 @@ def render_markdown(ctx: dict, lang: str = "en") -> str:
         a("| మార్కెట్ | జిల్లా | రకం | ధర ₹/క్వింటాల్ |" if te
           else "| Market | District | Variety | Modal Rs/qtl |")
         a("|---|---|---|---|")
+        name = te_name if te else (lambda s: s)
         for r in ctx["ap_bench"][:12]:
-            a(f"| {r['market']} | {r['district']} | {r['variety']} | {r['modal']:,.0f} |")
+            a(f"| {name(r['market'])} | {name(r['district'])} | {name(r['variety'])} "
+              f"| {r['modal']:,.0f} |")
     else:
         a("ఈ రోజు ఇప్పటివరకు ఏ ఏపీ మార్కెట్ ధరలను నమోదు చేయలేదు." if te
           else "No AP market had reported a quote at run time.")
     a("")
     if ctx["tg_bench"]:
         label = "**తెలంగాణ మార్కెట్లు:** " if te else "**Telangana reference:** "
-        a(label + ", ".join(f"{r['market']} {rs}{r['modal']:,.0f}"
-                            for r in ctx["tg_bench"][:5]))
+        a(label + ", ".join(f"{te_name(r['market']) if te else r['market']} "
+                            f"{rs}{r['modal']:,.0f}" for r in ctx["tg_bench"][:5]))
         a("")
 
     a("## 2. " + ("ఈ వారం మార్పు" if te else "What moved"))
@@ -747,6 +786,14 @@ def _assemble(run_date, ap_median, tg_median, national_median, ap_bench, tg_benc
     }
 
 
+def subject_for(ctx: dict, lang: str) -> str:
+    if lang == "te":
+        return (f"ఏపీ మొక్కజొన్న వారపు నివేదిక - {ctx['pretty_date_te']} - "
+                f"₹{ctx['ap_median']:,.0f}/క్వింటాల్ ({arrow(ctx['wow'], 'te')})")
+    return (f"AP Maize Weekly Brief - {ctx['pretty_date']} - "
+            f"Rs {ctx['ap_median']:,.0f}/qtl ({arrow(ctx['wow'])} w/w)")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--outdir", default=str(REPO_ROOT / "briefs"))
@@ -760,24 +807,21 @@ def main() -> int:
     if not args.no_news:
         print("Fetched news scan.")
 
-    parts = [render_markdown(ctx, lang) for lang in args.lang.split(",")]
-    md = "\n\n---\n\n".join(parts)
-    html_doc = markdown_to_html(md)
-
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
-    md_path = outdir / f"ap-maize-brief-{ctx['run_date']}.md"
-    html_path = outdir / f"ap-maize-brief-{ctx['run_date']}.html"
-    md_path.write_text(md, encoding="utf-8")
-    html_path.write_text(html_doc, encoding="utf-8")
-    print(f"Wrote {md_path}")
-    print(f"Wrote {html_path}")
 
-    if args.email:
-        subject = (f"AP Maize Weekly Brief / మొక్కజొన్న వారపు నివేదిక - "
-                   f"{ctx['pretty_date']} - Rs {ctx['ap_median']:,.0f}/qtl "
-                   f"({arrow(ctx['wow'])} w/w)")
-        send_email(subject, html_doc, md)
+    # One self-contained document per language, and one email each - a single
+    # bilingual message buries whichever language you actually read.
+    for lang in [l.strip() for l in args.lang.split(",") if l.strip()]:
+        md = render_markdown(ctx, lang)
+        html_doc = markdown_to_html(md)
+        stem = f"ap-maize-brief-{ctx['run_date']}-{lang}"
+        (outdir / f"{stem}.md").write_text(md, encoding="utf-8")
+        (outdir / f"{stem}.html").write_text(html_doc, encoding="utf-8")
+        print(f"Wrote {outdir / stem}.md and .html")
+
+        if args.email:
+            send_email(subject_for(ctx, lang), html_doc, md)
     return 0
 
 
