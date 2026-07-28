@@ -45,37 +45,37 @@
 
 ## 5. వార్తల సమీక్ష (గత 8 రోజులు)
 
-*శీర్షికలు ప్రచురణకర్తలు ఇచ్చిన ఆంగ్ల రూపంలోనే ఉంచాము.*
+*శీర్షికలను తెలుగులో ఇచ్చాము. పక్కన వాలు అక్షరాలలో ఉన్నది అసలు ఆంగ్ల శీర్షిక - ఆ వార్తను వెతకడానికి అది ఉపయోగపడుతుంది.*
 
 **రుతుపవనాలు / ఎల్ నినో**
-- El Niño Strengthens as India's Monsoon Deficit Reduces to 17%; IMD Forecasts Mixed Rainfall Pattern Over Next Two Weeks - RuralVoice (23 Jul)
-- El Nino may intensify, harsher summer to follow: IMD - The New Indian Express (23 Jul)
-- El Nino Danger! When Will Monsoon Arrive In India? Delhi, Mumbai To Bengaluru, Check Rains Predictions & Dates - Goodreturns (27 Jul)
-- As told to Parliament (July 22, 2026): No unusually severe heatwaves in 2026 despite temperatures crossing 45°C - Down To Earth (23 Jul)
-- Heavy rain across a dozen states, yet India's monsoon suffers a 21% deficit: How the rain math works - Business Today (22 Jul)
+- భారతదేశ రుతుపవనాల లోటు 17%కి తగ్గడంతో ఎల్ నినో బలపడుతుంది; IMD రాబోయే రెండు వారాల్లో మిశ్రమ వర్షపాతం నమూనాను అంచనా వేసింది - RuralVoice (23 జూలై) · *El Niño Strengthens as India's Monsoon Deficit Reduces to 17%; IMD Forecasts Mixed Rainfall Pattern Over Next Two Weeks*
+- ఎల్ నినో తీవ్రతరం కావచ్చు, కఠినమైన వేసవిని అనుసరించవచ్చు: IMD - The New Indian Express (23 జూలై) · *El Nino may intensify, harsher summer to follow: IMD*
+- ఎల్ నినో ప్రమాదం! భారతదేశంలో రుతుపవనాలు ఎప్పుడు వస్తాయి? ఢిల్లీ, ముంబై నుండి బెంగళూరు వరకు, వర్షాల అంచనాలు & తేదీలను తనిఖీ చేయండి - Goodreturns (27 జూలై) · *El Nino Danger! When Will Monsoon Arrive In India? Delhi, Mumbai To Bengaluru, Check Rains Predictions & Dates*
+- పార్లమెంటుకు చెప్పినట్లు (జూలై 22, 2026): 2026లో ఉష్ణోగ్రతలు 45°C దాటినప్పటికీ అసాధారణంగా తీవ్రమైన వేడిగాలులు లేవు - Down To Earth (23 జూలై) · *As told to Parliament (July 22, 2026): No unusually severe heatwaves in 2026 despite temperatures crossing 45°C*
+- డజను రాష్ట్రాల్లో భారీ వర్షాలు కురుస్తున్నాయి, అయినప్పటికీ భారతదేశంలో రుతుపవనాలు 21% లోటును ఎదుర్కొంటాయి: వర్షం గణిత ఎలా పనిచేస్తుంది - Business Today (22 జూలై) · *Heavy rain across a dozen states, yet India's monsoon suffers a 21% deficit: How the rain math works*
 
 **విత్తనాలు & సాగు విస్తీర్ణం**
-- India Kharif Sowing Trails Last Year by 42.28 Lakh Hectares - Global Agriculture (22 Jul)
+- భారతదేశంలో గత ఏడాది ఖరీఫ్‌ విత్తనం 42.28 లక్షల హెక్టార్లలో ఉంది - Global Agriculture (22 జూలై) · *India Kharif Sowing Trails Last Year by 42.28 Lakh Hectares*
 
 **జలాశయాలు / ఏపీ నీటి పరిస్థితి**
-- Don’t cultivate paddy this kharif, Andhra Pradesh tells Krishna delta farmers amid water crunch - The Hindu (24 Jul)
+- ఈ ఖరీఫ్‌లో వరి సాగు చేయవద్దు, నీటి కష్టాల మధ్య కృష్ణా డెల్టా రైతులకు ఆంధ్రప్రదేశ్‌ చెప్పింది - The Hindu (24 జూలై) · *Don’t cultivate paddy this kharif, Andhra Pradesh tells Krishna delta farmers amid water crunch*
 
 **ఇథనాల్ విధానం & ధరలు**
-- Supporting infrastructure is the missing link in India’s ethanol push - Mongabay India (24 Jul)
-- Real markers of success for ethanol blending: What it entails, why and how much it costs | Hindustan Times - Hindustan Times (21 Jul)
-- Govt Pays Rs 70 Per Liter For Ethanol, Rs. 45/Liter For Petrol - Cartoq (22 Jul)
-- Centre assures 20% ethanol blending target has no impact on India’s food security or water stress - Punjab Kesari English (20 Jul)
-- Centre assures 20% ethanol blending target has no impact on India’s food security or water stress - The Sentinel - of this Land, for its People (21 Jul)
+- భారతదేశం యొక్క ఇథనాల్ పుష్‌లో మౌలిక సదుపాయాలకు మద్దతు ఇవ్వడం మిస్సింగ్ లింక్ - Mongabay India (24 జూలై) · *Supporting infrastructure is the missing link in India’s ethanol push*
+- ఇథనాల్ బ్లెండింగ్ విజయానికి నిజమైన గుర్తులు: దాని వల్ల ఏమిటి, ఎందుకు మరియు ఎంత ఖర్చవుతుంది | హిందుస్థాన్ టైమ్స్ - Hindustan Times (21 జూలై) · *Real markers of success for ethanol blending: What it entails, why and how much it costs | Hindustan Times*
+- ఇథనాల్‌కు లీటరుకు రూ. 70, రూ. 45/లీటర్ పెట్రోల్ - Cartoq (22 జూలై) · *Govt Pays Rs 70 Per Liter For Ethanol, Rs. 45/Liter For Petrol*
+- 20% ఇథనాల్ కలపడం లక్ష్యం భారతదేశ ఆహార భద్రత లేదా నీటి ఒత్తిడిపై ఎలాంటి ప్రభావం చూపదని కేంద్రం హామీ ఇచ్చింది - Punjab Kesari English (20 జూలై) · *Centre assures 20% ethanol blending target has no impact on India’s food security or water stress*
+- 20% ఇథనాల్ కలపడం లక్ష్యం భారతదేశ ఆహార భద్రత లేదా నీటి ఒత్తిడిపై ఎలాంటి ప్రభావం చూపదని కేంద్రం హామీ ఇచ్చింది - సెంటినెల్ - of this Land, for its People (21 జూలై) · *Centre assures 20% ethanol blending target has no impact on India’s food security or water stress - The Sentinel*
 
 **దాణా & కోళ్ల పరిశ్రమ డిమాండ్**
-- Indian egg prices crack new record as heat, feed costs bite - BusinessLine (23 Jul)
-- How prolonged heat, erratic rains are making eggs and chicken costlier - Business Standard (23 Jul)
-- Egg prices hit record Rs 9 in Telangana as chicken touches Rs 300/kg amid supply crunch - Telangana Today (22 Jul)
-- Egg price surges as supply shrinks, cost of poultry feed rises - The Times of India (20 Jul)
-- Costlier feed pushes up egg, broiler chicken prices - financialexpress.com (24 Jul)
+- వేడి, ఫీడ్ ఖర్చులు కాటు వేయడంతో భారతీయ గుడ్డు ధరలు కొత్త రికార్డును ఛేదించాయి - BusinessLine (23 జూలై) · *Indian egg prices crack new record as heat, feed costs bite*
+- సుదీర్ఘమైన వేడి, అస్థిరమైన వర్షాలు గుడ్లు మరియు కోడిని ఎంత ఖరీదైనవిగా చేస్తున్నాయి - Business Standard (23 జూలై) · *How prolonged heat, erratic rains are making eggs and chicken costlier*
+- సరఫరా సంక్షోభం మధ్య చికెన్ కిలో రూ. 300కి చేరుకోవడంతో తెలంగాణలో గుడ్డు ధరలు రికార్డు స్థాయిలో రూ.9కి చేరుకున్నాయి - Telangana Today (22 జూలై) · *Egg prices hit record Rs 9 in Telangana as chicken touches Rs 300/kg amid supply crunch*
+- సరఫరా తగ్గిపోవడం, పౌల్ట్రీ ఫీడ్ ధర పెరగడంతో గుడ్డు ధర పెరిగింది - The Times of India (20 జూలై) · *Egg price surges as supply shrinks, cost of poultry feed rises*
+- ఖరీదైన ఫీడ్ గుడ్డు, బ్రాయిలర్ చికెన్ ధరలను పెంచుతుంది - financialexpress.com (24 జూలై) · *Costlier feed pushes up egg, broiler chicken prices*
 
 **ఏపీ మొక్కజొన్న మార్కెట్**
-- Sugarcane cultivation in Andhra faces fresh setback amid El Niño fears - ChiniMandi (21 Jul)
+- ఎల్‌నినో భయాల మధ్య ఆంధ్రాలో చెరకు సాగుకు తాజాగా ఎదురుదెబ్బ తగిలింది - ChiniMandi (21 జూలై) · *Sugarcane cultivation in Andhra faces fresh setback amid El Niño fears*
 
 ---
 
