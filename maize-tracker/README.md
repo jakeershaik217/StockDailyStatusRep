@@ -23,10 +23,17 @@ and produces a brief covering:
 
 Output is written to `briefs/` as both Markdown and HTML, and can be emailed.
 
+## Languages
+
+The brief is bilingual by default: the English version, then the same analysis in
+Telugu below it. News headlines stay in the publisher's original English rather
+than being machine-translated.
+
 ## Running it
 
 ```bash
-python3 weekly_brief.py                 # write the brief to briefs/
+python3 weekly_brief.py                 # bilingual brief in briefs/
+python3 weekly_brief.py --lang te       # Telugu only
 python3 weekly_brief.py --no-news       # prices only, much faster
 python3 weekly_brief.py --email         # also email it
 ```
@@ -66,3 +73,17 @@ For Gmail, use an App Password (Google Account → Security → 2-Step Verificat
   commodity-only filter and splits by state locally.
 - MSP for maize, KMS 2026-27, is ₹2,410 per quintal. Update `MSP_BY_SEASON` and
   `CURRENT_MSP_SEASON` when the next announcement lands (expected May 2027).
+- The public data.gov.in sample key is rate-limited and returns HTTP 429 under
+  repeated runs; the script backs off 30 seconds per retry. Set
+  `DATA_GOV_IN_API_KEY` to your own key to avoid this.
+
+## Adding Telugu text
+
+The Telugu strings live alongside their English counterparts rather than in a
+separate catalogue: `TRIGGERS` rows are
+`(when_en, when_te, what_en, what_te, why_en, why_te)`, `SCENARIOS` rows are
+`(key, name_en, name_te, prob, low, high, centre)`, and `NEWS_LABELS_TE` maps the
+category names in `NEWS_QUERIES`. Sentences that depend on the day's numbers are
+built in `_msp_line()` and `_forecast_note()`, which switch on a state key
+(`msp_state`, `note_state`) set in `_assemble()` — so the analysis logic is
+decided once and only the wording differs by language.
