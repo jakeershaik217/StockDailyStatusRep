@@ -447,7 +447,8 @@ def send_email(subject: str, html_body: str, text_body: str) -> bool:
     host = os.environ.get("MAIZE_SMTP_HOST", "smtp.gmail.com")
     port = int(os.environ.get("MAIZE_SMTP_PORT", "587"))
     user = os.environ.get("MAIZE_SMTP_USER")
-    password = os.environ.get("MAIZE_SMTP_PASSWORD")
+    # Google displays app passwords in four-character groups; strip the spaces.
+    password = (os.environ.get("MAIZE_SMTP_PASSWORD") or "").replace(" ", "") or None
     to = os.environ.get("MAIZE_EMAIL_TO")
     sender = os.environ.get("MAIZE_EMAIL_FROM", user)
 
