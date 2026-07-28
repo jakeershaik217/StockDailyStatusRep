@@ -6,3 +6,6 @@ build
 lib/bin/
 lib/test-output/
 lib/build/
+# Python caches (maize-tracker)
+__pycache__/
+*.pyc
