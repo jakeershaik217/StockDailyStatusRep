@@ -21,15 +21,35 @@ and produces a brief covering:
    sowing and acreage, reservoirs, import duty and TRQ, ethanol policy, MSP and
    procurement, feed demand, and the AP market itself.
 
-Output is written to `briefs/` as both Markdown and HTML, and can be emailed.
+Output is written to `briefs/` as Markdown and HTML, and can be emailed.
+
+## Languages
+
+`--lang` renders one **self-contained document per language**, and `--email` sends
+one email per language — a complete English brief and a complete Telugu brief,
+each with its own subject line. It is not a single bilingual message.
+
+Market, district and variety names arrive from the API in English and are
+transliterated via `TRANSLIT_TE`; unmapped names are left as they came rather
+than guessed at.
+
+News headlines are machine-translated through Google's public translate endpoint
+and cached in `history/headlines_te.json`, with the original English kept in
+italics after each one so the article is still searchable. If the endpoint is
+unreachable the Telugu brief falls back to the English headline and warns on
+stderr rather than failing the run.
 
 ## Running it
 
 ```bash
-python3 weekly_brief.py                 # write the brief to briefs/
+python3 weekly_brief.py                 # both languages to briefs/
+python3 weekly_brief.py --lang te       # Telugu only
 python3 weekly_brief.py --no-news       # prices only, much faster
-python3 weekly_brief.py --email         # also email it
+python3 weekly_brief.py --email         # also email, one message per language
 ```
+
+Output files are suffixed with the language: `ap-maize-brief-2026-07-28-en.md`,
+`ap-maize-brief-2026-07-28-te.md`, plus the matching `.html`.
 
 No third-party dependencies — standard library only, Python 3.8+.
 
@@ -66,3 +86,17 @@ For Gmail, use an App Password (Google Account → Security → 2-Step Verificat
   commodity-only filter and splits by state locally.
 - MSP for maize, KMS 2026-27, is ₹2,410 per quintal. Update `MSP_BY_SEASON` and
   `CURRENT_MSP_SEASON` when the next announcement lands (expected May 2027).
+- The public data.gov.in sample key is rate-limited and returns HTTP 429 under
+  repeated runs; the script backs off 30 seconds per retry. Set
+  `DATA_GOV_IN_API_KEY` to your own key to avoid this.
+
+## Adding Telugu text
+
+The Telugu strings live alongside their English counterparts rather than in a
+separate catalogue: `TRIGGERS` rows are
+`(when_en, when_te, what_en, what_te, why_en, why_te)`, `SCENARIOS` rows are
+`(key, name_en, name_te, prob, low, high, centre)`, and `NEWS_LABELS_TE` maps the
+category names in `NEWS_QUERIES`. Sentences that depend on the day's numbers are
+built in `_msp_line()` and `_forecast_note()`, which switch on a state key
+(`msp_state`, `note_state`) set in `_assemble()` — so the analysis logic is
+decided once and only the wording differs by language.

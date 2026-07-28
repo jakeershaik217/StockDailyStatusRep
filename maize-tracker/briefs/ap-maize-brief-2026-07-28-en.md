@@ -1,27 +1,25 @@
 # AP Maize Weekly Brief - 28 July 2026
 
-**Headline: AP median modal price Rs 2,393/qtl** (n/a w/w, n/a vs 4 weeks ago) against an MSP of Rs 2,410 for KMS 2026-27.
+**Headline: AP median modal price Rs 2,368/qtl** (n/a w/w, n/a vs 4 weeks ago) against an MSP of Rs 2,410 for KMS 2026-27.
 
-> **Note:** the Agmarknet feed had only a handful of Andhra Pradesh quotes at run time (mandi holiday, or the feed had not filled for the day), so the headline medians carry over the 2026-07-27 reading. The market table below shows whatever has reported so far today.
-
-Position vs MSP: **Rs 17 below MSP - trading at parity**. Telangana median Rs 2,400 (the southern price setter). National median Rs 2,200, so the South carries a Rs 193 premium.
+Position vs MSP: **Rs 42 below MSP - trading at parity**. Telangana median Rs 2,250 (the southern price setter). National median Rs 2,350, so the South carries a Rs 18 premium.
 
 ## 1. Andhra Pradesh benchmark markets
 
 | Market | District | Variety | Modal Rs/qtl |
 |---|---|---|---|
-| Penukonda APMC | Sri Sathya Sai | Hybrid/Local | 2,450 |
-| Etcherla APMC | Srikakulam | Deshi White | 2,400 |
 | Bhimunipatnam APMC | Visakhapatnam | Hybrid Red (Cattle Feed) | 2,386 |
-| Rompicherla APMC | Palnadu | Hybrid/Local | 2,350 |
 | Mylavaram APMC | NTR | Hybrid | 2,300 |
 | Simhadhripuram APMC | YSR Kadapa | Hybrid/Local | 2,100 |
+| Parchur APMC | Bapatla | Local | 2,000 |
+
+**Telangana reference:** Bejjenki APMC Rs 2,250
 
 ## 2. What moved
 
 - Week on week: **n/a** (no prior week on file yet)
 - Four weeks: **n/a** (history still building)
-- Spread across AP markets: Rs 1,750 to Rs 2,500 across 34 reporting mandis
+- Spread across AP markets: Rs 2,000 to Rs 2,450 across 12 reporting mandis
 
 ## 3. Scenario tracker for June-July 2027
 
@@ -49,8 +47,8 @@ Position vs MSP: **Rs 17 below MSP - trading at parity**. Telangana median Rs 2,
 
 **Monsoon / El Nino**
 - El Niño Strengthens as India's Monsoon Deficit Reduces to 17%; IMD Forecasts Mixed Rainfall Pattern Over Next Two Weeks - RuralVoice (23 Jul)
-- El Nino Danger! When Will Monsoon Arrive In India? Delhi, Mumbai To Bengaluru, Check Rains Predictions & Dates - Goodreturns (27 Jul)
 - El Nino may intensify, harsher summer to follow: IMD - The New Indian Express (23 Jul)
+- El Nino Danger! When Will Monsoon Arrive In India? Delhi, Mumbai To Bengaluru, Check Rains Predictions & Dates - Goodreturns (27 Jul)
 - As told to Parliament (July 22, 2026): No unusually severe heatwaves in 2026 despite temperatures crossing 45°C - Down To Earth (23 Jul)
 - Heavy rain across a dozen states, yet India's monsoon suffers a 21% deficit: How the rain math works - Business Today (22 Jul)
 

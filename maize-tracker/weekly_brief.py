@@ -25,6 +25,7 @@ import ssl
 import statistics
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from email.message import EmailMessage
@@ -37,6 +38,8 @@ DEFAULT_API_KEY = "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b"
 
 REPO_ROOT = Path(__file__).resolve().parent
 HISTORY_FILE = REPO_ROOT / "history" / "maize_prices.csv"
+TRANSLATION_CACHE = REPO_ROOT / "history" / "headlines_te.json"
+TRANSLATE_URL = "https://translate.googleapis.com/translate_a/single"
 
 # Markets that actually set the price for an Andhra Pradesh seller.
 AP_BENCHMARK_MARKETS = [
@@ -67,28 +70,109 @@ NEWS_QUERIES = [
     ("AP maize market", "Andhra+Pradesh+maize+farmers+price+mandi"),
 ]
 
+# (when_en, when_te, what_en, what_te, why_en, why_te)
 TRIGGERS = [
-    ("Sep 2026", "IMD end-of-season rainfall; DES 1st Advance Estimates",
-     "Deficit >15% or maize output down >8% shifts the base case to the bull case"),
-    ("1 Nov 2026", "Nagarjuna Sagar / Srisailam storage",
-     "Below 40% cuts AP rabi maize area - worth about +Rs 200 on the Jun-Jul 2027 call"),
-    ("Nov-Dec 2026", "Kharif arrival prices at Nizamabad / Kurnool",
-     "Harvest prices holding above Rs 2,400 lift the whole 2027 curve by Rs 150-250"),
-    ("Dec 2026-Feb 2027", "Any DGFT notification on duty-free maize / corn TRQ for ethanol",
-     "The single biggest bear trigger - caps the market immediately"),
-    ("Jan 2027", "OMC ethanol procurement price revision for maize ethanol",
-     "A higher ethanol price raises the maize floor roughly one-for-one"),
-    ("Mar 2027", "DES 2nd Advance Estimates, rabi maize",
-     "Confirms or kills the tight-stocks story"),
-    ("May 2027", "MSP announcement for KMS 2027-28",
-     "Expect Rs 2,500-2,570; sets the psychological floor"),
+    ("Sep 2026", "2026 సెప్టెంబర్",
+     "IMD end-of-season rainfall; DES 1st Advance Estimates",
+     "IMD సీజన్ ముగింపు వర్షపాత లెక్కలు; DES మొదటి ముందస్తు అంచనాలు",
+     "Deficit >15% or maize output down >8% shifts the base case to the bull case",
+     "వర్షపాత లోటు 15% దాటినా, మొక్కజొన్న దిగుబడి 8% పైగా తగ్గినా ధరలు పెరిగే అంచనాకు మారాలి"),
+    ("1 Nov 2026", "2026 నవంబర్ 1",
+     "Nagarjuna Sagar / Srisailam storage",
+     "నాగార్జునసాగర్ / శ్రీశైలం నీటి నిల్వలు",
+     "Below 40% cuts AP rabi maize area - worth about +Rs 200 on the Jun-Jul 2027 call",
+     "40% కంటే తక్కువైతే ఏపీలో రబీ మొక్కజొన్న విస్తీర్ణం తగ్గుతుంది - 2027 జూన్-జూలై అంచనాకు సుమారు ₹200 అదనం"),
+    ("Nov-Dec 2026", "2026 నవంబర్-డిసెంబర్",
+     "Kharif arrival prices at Nizamabad / Kurnool",
+     "నిజామాబాద్ / కర్నూలు మార్కెట్లలో ఖరీఫ్ పంట ఆగమన ధరలు",
+     "Harvest prices holding above Rs 2,400 lift the whole 2027 curve by Rs 150-250",
+     "పంట కాలంలోనే ధర ₹2,400 పైన నిలిస్తే 2027 ధరల అంచనా మొత్తం ₹150-250 పెరుగుతుంది"),
+    ("Dec 2026-Feb 2027", "2026 డిసెంబర్-2027 ఫిబ్రవరి",
+     "Any DGFT notification on duty-free maize / corn TRQ for ethanol",
+     "ఇథనాల్ కోసం సుంకం లేని మొక్కజొన్న దిగుమతులు / TRQ పై DGFT ప్రకటన",
+     "The single biggest bear trigger - caps the market immediately",
+     "ధరలు తగ్గించే అతిపెద్ద కారణం - మార్కెట్‌కు వెంటనే పరిమితి విధిస్తుంది"),
+    ("Jan 2027", "2027 జనవరి",
+     "OMC ethanol procurement price revision for maize ethanol",
+     "మొక్కజొన్న ఇథనాల్‌కు OMC సేకరణ ధర సవరణ",
+     "A higher ethanol price raises the maize floor roughly one-for-one",
+     "ఇథనాల్ ధర పెరిగితే మొక్కజొన్న కనీస ధర కూడా దాదాపు అంతే స్థాయిలో పెరుగుతుంది"),
+    ("Mar 2027", "2027 మార్చి",
+     "DES 2nd Advance Estimates, rabi maize",
+     "DES రెండో ముందస్తు అంచనాలు, రబీ మొక్కజొన్న",
+     "Confirms or kills the tight-stocks story",
+     "నిల్వలు తక్కువగా ఉన్నాయా లేదా అనేది స్పష్టమవుతుంది"),
+    ("May 2027", "2027 మే",
+     "MSP announcement for KMS 2027-28",
+     "KMS 2027-28 కనీస మద్దతు ధర (MSP) ప్రకటన",
+     "Expect Rs 2,500-2,570; sets the psychological floor",
+     "₹2,500-2,570 ఉండవచ్చు; మార్కెట్‌కు మానసిక కనీస స్థాయిని నిర్ణయిస్తుంది"),
 ]
 
+# (key, name_en, name_te, probability, low, high, centre)
 SCENARIOS = [
-    ("Base - mild deficit, ethanol demand grinds prices up", 55, 2550, 2850, 2700),
-    ("Bull - El Nino damage carries into rabi", 25, 3000, 3400, 3150),
-    ("Bear - monsoon recovers, big rabi, liberal imports", 20, 2200, 2450, 2350),
+    ("base", "Base - mild deficit, ethanol demand grinds prices up",
+     "సాధారణ అంచనా - కొద్దిపాటి కొరత, ఇథనాల్ డిమాండ్‌తో ధరలు నెమ్మదిగా పైకి",
+     55, 2550, 2850, 2700),
+    ("bull", "Bull - El Nino damage carries into rabi",
+     "ధరలు పెరిగే అంచనా - ఎల్ నినో నష్టం రబీ వరకు కొనసాగితే",
+     25, 3000, 3400, 3150),
+    ("bear", "Bear - monsoon recovers, big rabi, liberal imports",
+     "ధరలు తగ్గే అంచనా - రుతుపవనాలు కోలుకుని, రబీ దిగుబడి పెరిగి, దిగుమతులు సడలిస్తే",
+     20, 2200, 2450, 2350),
 ]
+
+# Market, district and variety names arrive from the API in English. Transliterate
+# the ones that actually show up in the southern maize feed; anything unmapped is
+# left as it came, which is better than a wrong guess at a place name.
+TRANSLIT_TE = {
+    # AP markets
+    "Kurnool": "కర్నూలు", "Panyam": "పాణ్యం", "Nandyal": "నంద్యాల",
+    "Bapatla": "బాపట్ల", "Parchur": "పర్చూరు", "Ipur": "ఇపూరు",
+    "Mylavaram": "మైలవరం", "Rajanagaram": "రాజానగరం", "Bhimunipatnam": "భీమునిపట్నం",
+    "Ponduru": "పొందూరు", "Simhadhripuram": "సింహాద్రిపురం", "Guntur": "గుంటూరు",
+    "Chittoor": "చిత్తూరు", "Tadepalligudem": "తాడేపల్లిగూడెం", "Palakonda": "పాలకొండ",
+    "Vinukonda": "వినుకొండ", "Duggirala": "దుగ్గిరాల", "Podili": "పొదిలి",
+    # Telangana markets
+    "Nizamabad": "నిజామాబాద్", "Jagtial": "జగిత్యాల", "Karimnagar": "కరీంనగర్",
+    "Warangal": "వరంగల్", "Siddipet": "సిద్దిపేట", "Bejjenki": "బెజ్జంకి",
+    # Districts
+    "Visakhapatnam": "విశాఖపట్నం", "NTR": "ఎన్టీఆర్", "YSR": "వైఎస్సార్",
+    "Kadapa": "కడప", "Krishna": "కృష్ణా", "Prakasam": "ప్రకాశం",
+    "Srikakulam": "శ్రీకాకుళం", "Anantapur": "అనంతపురం", "Vizianagaram": "విజయనగరం",
+    "Palnadu": "పల్నాడు", "Eluru": "ఏలూరు", "Kakinada": "కాకినాడ",
+    "Konaseema": "కోనసీమ", "Annamayya": "అన్నమయ్య", "Tirupati": "తిరుపతి",
+    "Nellore": "నెల్లూరు", "Anakapalli": "అనకాపల్లి", "Manyam": "మన్యం",
+    "Parvathipuram": "పార్వతీపురం", "Godavari": "గోదావరి", "East": "తూర్పు",
+    "West": "పశ్చిమ", "Sri": "శ్రీ", "Sathya": "సత్యసాయి", "Sai": "",
+    # Varieties
+    "Hybrid": "హైబ్రిడ్", "Local": "లోకల్", "Yellow": "పసుపు", "White": "తెలుపు",
+    "Red": "ఎరుపు", "Deshi": "దేశీ", "Cattle": "పశువుల", "Feed": "దాణా",
+    "Medium": "మధ్యస్థం", "Other": "ఇతర", "Maize": "మొక్కజొన్న",
+    "APMC": "మార్కెట్",
+}
+_TRANSLIT_RE = re.compile(r"\b(" + "|".join(sorted(TRANSLIT_TE, key=len, reverse=True)) + r")\b")
+
+
+def te_name(text: str) -> str:
+    """Transliterate the English tokens in a market, district or variety name."""
+    return " ".join(_TRANSLIT_RE.sub(lambda m: TRANSLIT_TE[m.group(1)], text).split())
+
+
+MONTHS_TE = ["జనవరి", "ఫిబ్రవరి", "మార్చి", "ఏప్రిల్", "మే", "జూన్",
+             "జూలై", "ఆగస్టు", "సెప్టెంబర్", "అక్టోబర్", "నవంబర్", "డిసెంబర్"]
+
+# Telugu labels for the news categories defined in NEWS_QUERIES.
+NEWS_LABELS_TE = {
+    "Monsoon / El Nino": "రుతుపవనాలు / ఎల్ నినో",
+    "Sowing & acreage": "విత్తనాలు & సాగు విస్తీర్ణం",
+    "Reservoirs / AP water": "జలాశయాలు / ఏపీ నీటి పరిస్థితి",
+    "Imports & duty (bear trigger)": "దిగుమతులు & సుంకం (ధర తగ్గే ముప్పు)",
+    "Ethanol policy & pricing": "ఇథనాల్ విధానం & ధరలు",
+    "MSP & procurement": "కనీస మద్దతు ధర & సేకరణ",
+    "Feed & poultry demand": "దాణా & కోళ్ల పరిశ్రమ డిమాండ్",
+    "AP maize market": "ఏపీ మొక్కజొన్న మార్కెట్",
+}
 
 
 # --------------------------------------------------------------------------
@@ -103,6 +187,10 @@ def _get_json(url: str, timeout: int = 45, attempts: int = 3) -> dict:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return json.loads(resp.read().decode("utf-8", "ignore"))
+        except urllib.error.HTTPError as exc:
+            last = exc
+            # data.gov.in throttles hard; back off well past its window.
+            time.sleep((30 if exc.code == 429 else 3) * (attempt + 1))
         except Exception as exc:
             last = exc
             time.sleep(3 * (attempt + 1))
@@ -267,103 +355,265 @@ def fetch_news(days: int = 8) -> dict:
             if pub < cutoff:
                 continue
             title = html.unescape(re.sub(r"<[^>]+>", "", title_m.group(1))).strip()
-            items.append({"title": title, "date": pub.strftime("%d %b")})
+            # Google appends " - Publisher"; keep the outlet out of the translation.
+            head, sep, source = title.rpartition(" - ")
+            if not sep:
+                head, source = title, ""
+            items.append({"title": head, "source": source,
+                          "date": pub.strftime("%d %b"),
+                          "date_te": f"{pub.day} {MONTHS_TE[pub.month - 1]}"})
             if len(items) >= 5:
                 break
         results[label] = items
     return results
 
 
+def translate_te(text: str, cache: dict) -> str:
+    """Translate one headline to Telugu, or return "" if the service is unavailable.
+
+    Headlines are cached in history/headlines_te.json - the same story turns up
+    across weeks, and the endpoint is unauthenticated and worth being gentle with.
+    """
+    if text in cache:
+        return cache[text]
+    params = urllib.parse.urlencode({"client": "gtx", "sl": "en", "tl": "te",
+                                     "dt": "t", "q": text})
+    try:
+        payload = _get_json(f"{TRANSLATE_URL}?{params}", timeout=20, attempts=2)
+        out = "".join(seg[0] for seg in payload[0] if seg and seg[0])
+    except Exception:
+        return ""
+    cache[text] = out
+    return out
+
+
+def attach_te_titles(news: dict) -> None:
+    """Fill item["title_te"] for every headline, in place."""
+    cache = {}
+    if TRANSLATION_CACHE.exists():
+        try:
+            cache = json.loads(TRANSLATION_CACHE.read_text(encoding="utf-8"))
+        except (ValueError, OSError):
+            cache = {}
+    before, failures = len(cache), 0
+    for items in news.values():
+        for item in items:
+            item["title_te"] = translate_te(item["title"], cache)
+            if not item["title_te"]:
+                failures += 1
+    if failures:
+        print(f"  warning: {failures} headline(s) could not be translated",
+              file=sys.stderr)
+    if len(cache) != before:
+        TRANSLATION_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        TRANSLATION_CACHE.write_text(
+            json.dumps(cache, ensure_ascii=False, indent=1, sort_keys=True),
+            encoding="utf-8")
+
+
 # --------------------------------------------------------------------------
 # Rendering
 # --------------------------------------------------------------------------
 
-def arrow(change):
+def arrow(change, lang="en"):
     if change is None:
-        return "n/a"
+        return "n/a" if lang == "en" else "అందుబాటులో లేదు"
     sign = "+" if change >= 0 else ""
-    marker = "UP" if change > 0.5 else ("DOWN" if change < -0.5 else "FLAT")
+    if lang == "en":
+        marker = "UP" if change > 0.5 else ("DOWN" if change < -0.5 else "FLAT")
+    else:
+        marker = "పెరుగుదల" if change > 0.5 else ("తగ్గుదల" if change < -0.5 else "స్థిరం")
     return f"{sign}{change:.1f}% {marker}"
 
 
-def render_markdown(ctx: dict) -> str:
+def _msp_line(ctx, lang):
+    gap, state = ctx["msp_gap"], ctx["msp_state"]
+    if lang == "en":
+        if state == "above":
+            return f"Rs {gap:,.0f} above MSP - the ethanol bid is doing the work"
+        if state == "parity":
+            return (f"Rs {abs(gap):,.0f} {'above' if gap >= 0 else 'below'} MSP - "
+                    f"trading at parity")
+        return (f"Rs {abs(gap):,.0f} below MSP - distress territory, watch for "
+                f"procurement demands from AP and Telangana")
+    if state == "above":
+        return f"కనీస మద్దతు ధర కంటే ₹{gap:,.0f} ఎక్కువ - ఇథనాల్ కొనుగోళ్లే ధరను నిలబెడుతున్నాయి"
+    if state == "parity":
+        return (f"కనీస మద్దతు ధర కంటే ₹{abs(gap):,.0f} {'ఎక్కువ' if gap >= 0 else 'తక్కువ'} - "
+                f"దాదాపు సమాన స్థాయిలో")
+    return (f"కనీస మద్దతు ధర కంటే ₹{abs(gap):,.0f} తక్కువ - రైతులకు నష్టదాయక స్థాయి, ఏపీ మరియు "
+            f"తెలంగాణ నుంచి సేకరణ డిమాండ్లు రావచ్చు")
+
+
+def _forecast_note(ctx, lang):
+    state = ctx["note_state"]
+    if lang == "en":
+        return {
+            "bull": "Prices are already inside the bull range - consider raising the base case.",
+            "bear": "Prices are soft; if this persists into the kharif harvest the bear case "
+                    "gains weight.",
+            "base": "Today's print is consistent with the base case.",
+        }[state]
+    return {
+        "bull": "ధరలు ఇప్పటికే ఎక్కువ అంచనా పరిధిలో ఉన్నాయి - సాధారణ అంచనాను పెంచడం పరిశీలించాలి.",
+        "bear": "ధరలు బలహీనంగా ఉన్నాయి; ఖరీఫ్ కోత వరకు ఇలాగే కొనసాగితే తక్కువ ధరల అంచనాకు బలం చేకూరుతుంది.",
+        "base": "నేటి ధర సాధారణ అంచనాకు అనుగుణంగానే ఉంది.",
+    }[state]
+
+
+STATUS_TE = {"on track": "అనుకున్నట్టే", "off track": "పక్కదారి",
+             "live": "అమల్లోకి వచ్చింది", "not yet": "ఇంకా కాదు"}
+
+
+def render_markdown(ctx: dict, lang: str = "en") -> str:
+    """Render the brief in English (lang="en") or Telugu (lang="te")."""
+    te = lang == "te"
     L = []
     a = L.append
-    a(f"# AP Maize Weekly Brief - {ctx['pretty_date']}")
-    a("")
-    a(f"**Headline: AP median modal price Rs {ctx['ap_median']:,.0f}/qtl** "
-      f"({arrow(ctx['wow'])} w/w, {arrow(ctx['mom'])} vs 4 weeks ago) "
-      f"against an MSP of Rs {ctx['msp']:,} for KMS {CURRENT_MSP_SEASON}.")
-    a("")
-    if ctx.get("stale_from"):
-        a(f"> **Note:** the Agmarknet feed had only a handful of Andhra Pradesh quotes "
-          f"at run time (mandi holiday, or the feed had not filled for the day), so the "
-          f"headline medians carry over the {ctx['stale_from']} reading. The market "
-          f"table below shows whatever has reported so far today.")
+    rs = "₹" if te else "Rs "
+
+    if te:
+        a(f"# ఏపీ మొక్కజొన్న వారపు నివేదిక - {ctx['pretty_date_te']}")
         a("")
-    a(f"Position vs MSP: **{ctx['vs_msp']}**. "
-      f"Telangana median Rs {ctx['tg_median']:,.0f} (the southern price setter). "
-      f"National median Rs {ctx['national_median']:,.0f}, so the South carries a "
-      f"Rs {ctx['south_premium']:,.0f} premium.")
+        a(f"**ముఖ్యాంశం: ఏపీ సగటు (మధ్యస్థ) మార్కెట్ ధర ₹{ctx['ap_median']:,.0f}/క్వింటాల్** "
+          f"(వారంతో పోలిస్తే {arrow(ctx['wow'], 'te')}, నాలుగు వారాలతో పోలిస్తే "
+          f"{arrow(ctx['mom'], 'te')}). KMS {CURRENT_MSP_SEASON} కనీస మద్దతు ధర "
+          f"₹{ctx['msp']:,}.")
+    else:
+        a(f"# AP Maize Weekly Brief - {ctx['pretty_date']}")
+        a("")
+        a(f"**Headline: AP median modal price Rs {ctx['ap_median']:,.0f}/qtl** "
+          f"({arrow(ctx['wow'])} w/w, {arrow(ctx['mom'])} vs 4 weeks ago) "
+          f"against an MSP of Rs {ctx['msp']:,} for KMS {CURRENT_MSP_SEASON}.")
     a("")
 
-    a("## 1. Andhra Pradesh benchmark markets")
+    if ctx.get("stale_from"):
+        if te:
+            a(f"> **గమనిక:** ఈ నివేదిక తయారుచేసే సమయానికి అగ్రిమార్క్‌నెట్‌లో ఆంధ్రప్రదేశ్ "
+              f"ధరలు చాలా తక్కువ మార్కెట్ల నుంచే వచ్చాయి (మార్కెట్ సెలవు, లేదా ఆ రోజు "
+              f"సమాచారం ఇంకా నమోదు కాలేదు). అందుకే ప్రధాన సగటు ధరలు {ctx['stale_from']} "
+              f"నాటివి. కింది పట్టికలో ఈ రోజు ఇప్పటివరకు నమోదైన ధరలే ఉన్నాయి.")
+        else:
+            a(f"> **Note:** the Agmarknet feed had only a handful of Andhra Pradesh quotes "
+              f"at run time (mandi holiday, or the feed had not filled for the day), so the "
+              f"headline medians carry over the {ctx['stale_from']} reading. The market "
+              f"table below shows whatever has reported so far today.")
+        a("")
+
+    if te:
+        a(f"కనీస మద్దతు ధరతో పోలిక: **{_msp_line(ctx, 'te')}**. "
+          f"తెలంగాణ సగటు ₹{ctx['tg_median']:,.0f} (దక్షిణాదిలో ధరను నిర్ణయించేది ఇదే). "
+          f"జాతీయ సగటు ₹{ctx['national_median']:,.0f} - అంటే దక్షిణాదిలో "
+          f"₹{ctx['south_premium']:,.0f} అధిక ధర.")
+    else:
+        a(f"Position vs MSP: **{_msp_line(ctx, 'en')}**. "
+          f"Telangana median Rs {ctx['tg_median']:,.0f} (the southern price setter). "
+          f"National median Rs {ctx['national_median']:,.0f}, so the South carries a "
+          f"Rs {ctx['south_premium']:,.0f} premium.")
     a("")
-    a("| Market | District | Variety | Modal Rs/qtl |")
-    a("|---|---|---|---|")
-    for r in ctx["ap_bench"][:12]:
-        a(f"| {r['market']} | {r['district']} | {r['variety']} | {r['modal']:,.0f} |")
+
+    a("## 1. " + ("ఆంధ్రప్రదేశ్ ప్రధాన మార్కెట్లు" if te else "Andhra Pradesh benchmark markets"))
+    a("")
+    if ctx["ap_bench"]:
+        a("| మార్కెట్ | జిల్లా | రకం | ధర ₹/క్వింటాల్ |" if te
+          else "| Market | District | Variety | Modal Rs/qtl |")
+        a("|---|---|---|---|")
+        name = te_name if te else (lambda s: s)
+        for r in ctx["ap_bench"][:12]:
+            a(f"| {name(r['market'])} | {name(r['district'])} | {name(r['variety'])} "
+              f"| {r['modal']:,.0f} |")
+    else:
+        a("ఈ రోజు ఇప్పటివరకు ఏ ఏపీ మార్కెట్ ధరలను నమోదు చేయలేదు." if te
+          else "No AP market had reported a quote at run time.")
     a("")
     if ctx["tg_bench"]:
-        a("**Telangana reference:** " + ", ".join(
-            f"{r['market']} Rs {r['modal']:,.0f}" for r in ctx["tg_bench"][:5]))
+        label = "**తెలంగాణ మార్కెట్లు:** " if te else "**Telangana reference:** "
+        a(label + ", ".join(f"{te_name(r['market']) if te else r['market']} "
+                            f"{rs}{r['modal']:,.0f}" for r in ctx["tg_bench"][:5]))
         a("")
 
-    a("## 2. What moved")
+    a("## 2. " + ("ఈ వారం మార్పు" if te else "What moved"))
     a("")
-    a(f"- Week on week: **{arrow(ctx['wow'])}**"
-      + (f" (from Rs {ctx['prev_week']:,.0f})" if ctx["prev_week"] else " (no prior week on file yet)"))
-    a(f"- Four weeks: **{arrow(ctx['mom'])}**"
-      + (f" (from Rs {ctx['prev_month']:,.0f})" if ctx["prev_month"] else " (history still building)"))
-    a(f"- Spread across AP markets: Rs {ctx['ap_min']:,.0f} to Rs {ctx['ap_max']:,.0f} "
-      f"across {ctx['ap_count']} reporting mandis")
+    if te:
+        a("- గత వారంతో పోలిస్తే: **" + arrow(ctx["wow"], "te") + "**"
+          + (f" (అప్పుడు ₹{ctx['prev_week']:,.0f})" if ctx["prev_week"]
+             else " (గత వారం సమాచారం ఇంకా లేదు)"))
+        a("- నాలుగు వారాలతో పోలిస్తే: **" + arrow(ctx["mom"], "te") + "**"
+          + (f" (అప్పుడు ₹{ctx['prev_month']:,.0f})" if ctx["prev_month"]
+             else " (సమాచారం ఇంకా సేకరిస్తున్నాం)"))
+        a(f"- ఏపీ మార్కెట్లలో ధరల వ్యత్యాసం: ₹{ctx['ap_min']:,.0f} నుంచి "
+          f"₹{ctx['ap_max']:,.0f} వరకు, మొత్తం {ctx['ap_count']} మార్కెట్లలో")
+    else:
+        a(f"- Week on week: **{arrow(ctx['wow'])}**"
+          + (f" (from Rs {ctx['prev_week']:,.0f})" if ctx["prev_week"]
+             else " (no prior week on file yet)"))
+        a(f"- Four weeks: **{arrow(ctx['mom'])}**"
+          + (f" (from Rs {ctx['prev_month']:,.0f})" if ctx["prev_month"]
+             else " (history still building)"))
+        a(f"- Spread across AP markets: Rs {ctx['ap_min']:,.0f} to Rs {ctx['ap_max']:,.0f} "
+          f"across {ctx['ap_count']} reporting mandis")
     a("")
 
-    a("## 3. Scenario tracker for June-July 2027")
+    a("## 3. " + ("2027 జూన్-జూలై అంచనాల పట్టిక" if te
+                 else "Scenario tracker for June-July 2027"))
     a("")
-    a("| Scenario | Prob. | Range Rs/qtl | Centre | On track? |")
+    a("| అంచనా | సంభావ్యత | పరిధి ₹/క్వి. | సగటు | ప్రస్తుత స్థితి |" if te
+      else "| Scenario | Prob. | Range Rs/qtl | Centre | On track? |")
     a("|---|---|---|---|---|")
-    for name, prob, lo, hi, mid in SCENARIOS:
-        a(f"| {name} | {prob}% | {lo:,} - {hi:,} | {mid:,} | {ctx['scenario_status'].get(name, 'monitoring')} |")
+    for key, name_en, name_te, prob, lo, hi, mid in SCENARIOS:
+        status = ctx["scenario_status"].get(key, "monitoring")
+        if te:
+            status = STATUS_TE.get(status, status)
+        a(f"| {name_te if te else name_en} | {prob}% | {lo:,} - {hi:,} | {mid:,} | {status} |")
     a("")
-    a(f"**Working forecast unchanged: Rs 2,700/qtl in June 2027, Rs 2,750 in July 2027 "
-      f"(70% band Rs 2,450-3,000).** {ctx['forecast_note']}")
+    if te:
+        a(f"**ప్రస్తుత అంచనాలో మార్పు లేదు: 2027 జూన్‌లో ₹2,700/క్వింటాల్, జూలైలో ₹2,750 "
+          f"(70% విశ్వాస పరిధి ₹2,450-3,000).** {_forecast_note(ctx, 'te')}")
+    else:
+        a(f"**Working forecast unchanged: Rs 2,700/qtl in June 2027, Rs 2,750 in July 2027 "
+          f"(70% band Rs 2,450-3,000).** {_forecast_note(ctx, 'en')}")
     a("")
 
-    a("## 4. Trigger calendar")
+    a("## 4. " + ("గమనించవలసిన ముఖ్య తేదీలు" if te else "Trigger calendar"))
     a("")
-    a("| When | What | Why it matters |")
+    a("| ఎప్పుడు | ఏమిటి | ఎందుకు ముఖ్యం |" if te else "| When | What | Why it matters |")
     a("|---|---|---|")
-    for when, what, why in TRIGGERS:
-        a(f"| {when} | {what} | {why} |")
+    for when_en, when_te, what_en, what_te, why_en, why_te in TRIGGERS:
+        a(f"| {when_te if te else when_en} | {what_te if te else what_en} "
+          f"| {why_te if te else why_en} |")
     a("")
 
     if ctx["news"]:
-        a("## 5. News scan (last 8 days)")
+        a("## 5. " + ("వార్తల సమీక్ష (గత 8 రోజులు)" if te
+                     else "News scan (last 8 days)"))
         a("")
+        if te:
+            a("*శీర్షికలను తెలుగులో ఇచ్చాము. పక్కన వాలు అక్షరాలలో ఉన్నది అసలు ఆంగ్ల "
+              "శీర్షిక - ఆ వార్తను వెతకడానికి అది ఉపయోగపడుతుంది.*")
+            a("")
         for label, items in ctx["news"].items():
             if not items:
                 continue
-            a(f"**{label}**")
+            a(f"**{NEWS_LABELS_TE.get(label, label) if te else label}**")
             for item in items:
-                a(f"- {item['title']} ({item['date']})")
+                if te:
+                    head = item.get("title_te") or item["title"]
+                    a(f"- {head} - {item['source']} ({item['date_te']}) · "
+                      f"*{item['title']}*")
+                else:
+                    a(f"- {item['title']} - {item['source']} ({item['date']})")
             a("")
 
     a("---")
     a("")
-    a("*Data: Agmarknet daily mandi prices via data.gov.in. "
-      "Thin-arrival quotes outside Rs 1,200-4,000 are excluded from medians. "
-      "Generated automatically; the scenario view is a judgement call, not a fact.*")
+    if te:
+        a("*సమాచారం: data.gov.in ద్వారా అగ్రిమార్క్‌నెట్ రోజువారీ మార్కెట్ ధరలు. "
+          "₹1,200-4,000 పరిధి దాటిన ధరలను సగటు లెక్కల నుంచి తొలగించాము. "
+          "ఇది స్వయంచాలకంగా తయారైన నివేదిక; అంచనాలు ఒక అభిప్రాయం మాత్రమే, ఖచ్చితమైన నిజం కాదు.*")
+    else:
+        a("*Data: Agmarknet daily mandi prices via data.gov.in. "
+          "Thin-arrival quotes outside Rs 1,200-4,000 are excluded from medians. "
+          "Generated automatically; the scenario view is a judgement call, not a fact.*")
     return "\n".join(L)
 
 
@@ -424,8 +674,11 @@ def markdown_to_html(md: str) -> str:
     if in_list:
         out.append("</ul>")
     body = "\n".join(out)
-    return ("<html><body style=\"font-family:Segoe UI,Helvetica,Arial,sans-serif;"
-            "font-size:14px;color:#222;max-width:900px\">" + body + "</body></html>")
+    # Noto Sans Telugu first so the Telugu half renders with proper conjuncts.
+    return ("<html><head><meta charset=\"utf-8\"></head>"
+            "<body style=\"font-family:'Noto Sans Telugu','Gautami',Segoe UI,"
+            "Helvetica,Arial,sans-serif;font-size:14px;color:#222;max-width:900px\">"
+            + body + "</body></html>")
 
 
 # --------------------------------------------------------------------------
@@ -552,40 +805,28 @@ def _assemble(run_date, ap_median, tg_median, national_median, ap_bench, tg_benc
 
     msp = MSP_BY_SEASON[CURRENT_MSP_SEASON]
     gap = ap_median - msp
-    if gap > 150:
-        vs_msp = f"Rs {gap:,.0f} above MSP - the ethanol bid is doing the work"
-    elif gap >= -50:
-        vs_msp = f"Rs {abs(gap):,.0f} {'above' if gap >= 0 else 'below'} MSP - trading at parity"
-    else:
-        vs_msp = (f"Rs {abs(gap):,.0f} below MSP - distress territory, watch for "
-                  f"procurement demands from AP and Telangana")
+    msp_state = "above" if gap > 150 else ("parity" if gap >= -50 else "below")
 
     # Which scenario does today's print support?
-    status = {}
-    for name, _prob, lo, hi, _mid in SCENARIOS:
-        if name.startswith("Base"):
-            status[name] = "on track" if 2350 <= ap_median <= 2700 else "off track"
-        elif name.startswith("Bull"):
-            status[name] = "live" if ap_median > 2700 else "not yet"
-        else:
-            status[name] = "live" if ap_median < 2350 else "not yet"
+    status = {
+        "base": "on track" if 2350 <= ap_median <= 2700 else "off track",
+        "bull": "live" if ap_median > 2700 else "not yet",
+        "bear": "live" if ap_median < 2350 else "not yet",
+    }
+    note_state = "bull" if ap_median > 2700 else ("bear" if ap_median < 2300 else "base")
 
-    if ap_median > 2700:
-        note = "Prices are already inside the bull range - consider raising the base case."
-    elif ap_median < 2300:
-        note = "Prices are soft; if this persists into the kharif harvest the bear case gains weight."
-    else:
-        note = "Today's print is consistent with the base case."
-
+    day = dt.date.fromisoformat(run_date)
     return {
         "run_date": run_date,
-        "pretty_date": dt.date.fromisoformat(run_date).strftime("%d %B %Y"),
+        "pretty_date": day.strftime("%d %B %Y"),
+        "pretty_date_te": f"{day.year} {MONTHS_TE[day.month - 1]} {day.day}",
         "ap_median": ap_median,
         "tg_median": tg_median,
         "national_median": national_median,
         "south_premium": ap_median - national_median,
         "msp": msp,
-        "vs_msp": vs_msp,
+        "msp_gap": gap,
+        "msp_state": msp_state,
         "ap_bench": ap_bench,
         "tg_bench": tg_bench,
         "ap_min": ap_min,
@@ -597,9 +838,17 @@ def _assemble(run_date, ap_median, tg_median, national_median, ap_bench, tg_benc
         "prev_week": float(prev_week["ap_median"]) if prev_week else None,
         "prev_month": float(prev_month["ap_median"]) if prev_month else None,
         "scenario_status": status,
-        "forecast_note": note,
+        "note_state": note_state,
         "news": {} if no_news else fetch_news(),
     }
+
+
+def subject_for(ctx: dict, lang: str) -> str:
+    if lang == "te":
+        return (f"ఏపీ మొక్కజొన్న వారపు నివేదిక - {ctx['pretty_date_te']} - "
+                f"₹{ctx['ap_median']:,.0f}/క్వింటాల్ ({arrow(ctx['wow'], 'te')})")
+    return (f"AP Maize Weekly Brief - {ctx['pretty_date']} - "
+            f"Rs {ctx['ap_median']:,.0f}/qtl ({arrow(ctx['wow'])} w/w)")
 
 
 def main() -> int:
@@ -607,28 +856,33 @@ def main() -> int:
     parser.add_argument("--outdir", default=str(REPO_ROOT / "briefs"))
     parser.add_argument("--no-news", action="store_true", help="skip the news scan")
     parser.add_argument("--email", action="store_true", help="email the brief over SMTP")
+    parser.add_argument("--lang", default="en,te",
+                        help="comma-separated languages to render: en, te, or en,te")
     args = parser.parse_args()
 
     ctx = build_context(no_news=args.no_news)
     if not args.no_news:
         print("Fetched news scan.")
 
-    md = render_markdown(ctx)
-    html_doc = markdown_to_html(md)
-
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
-    md_path = outdir / f"ap-maize-brief-{ctx['run_date']}.md"
-    html_path = outdir / f"ap-maize-brief-{ctx['run_date']}.html"
-    md_path.write_text(md)
-    html_path.write_text(html_doc)
-    print(f"Wrote {md_path}")
-    print(f"Wrote {html_path}")
 
-    if args.email:
-        subject = (f"AP Maize Weekly Brief - {ctx['pretty_date']} - "
-                   f"Rs {ctx['ap_median']:,.0f}/qtl ({arrow(ctx['wow'])} w/w)")
-        send_email(subject, html_doc, md)
+    langs = [l.strip() for l in args.lang.split(",") if l.strip()]
+    if "te" in langs and ctx["news"]:
+        attach_te_titles(ctx["news"])
+
+    # One self-contained document per language, and one email each - a single
+    # bilingual message buries whichever language you actually read.
+    for lang in langs:
+        md = render_markdown(ctx, lang)
+        html_doc = markdown_to_html(md)
+        stem = f"ap-maize-brief-{ctx['run_date']}-{lang}"
+        (outdir / f"{stem}.md").write_text(md, encoding="utf-8")
+        (outdir / f"{stem}.html").write_text(html_doc, encoding="utf-8")
+        print(f"Wrote {outdir / stem}.md and .html")
+
+        if args.email:
+            send_email(subject_for(ctx, lang), html_doc, md)
     return 0
 
 
