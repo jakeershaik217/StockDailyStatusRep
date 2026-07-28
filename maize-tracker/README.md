@@ -21,22 +21,29 @@ and produces a brief covering:
    sowing and acreage, reservoirs, import duty and TRQ, ethanol policy, MSP and
    procurement, feed demand, and the AP market itself.
 
-Output is written to `briefs/` as both Markdown and HTML, and can be emailed.
+Output is written to `briefs/` as Markdown and HTML, and can be emailed.
 
 ## Languages
 
-The brief is bilingual by default: the English version, then the same analysis in
-Telugu below it. News headlines stay in the publisher's original English rather
-than being machine-translated.
+`--lang` renders one **self-contained document per language**, and `--email` sends
+one email per language — a complete English brief and a complete Telugu brief,
+each with its own subject line. It is not a single bilingual message.
+
+Market, district and variety names arrive from the API in English and are
+transliterated via `TRANSLIT_TE`; unmapped names are left as they came rather
+than guessed at. News headlines stay in the publisher's original English.
 
 ## Running it
 
 ```bash
-python3 weekly_brief.py                 # bilingual brief in briefs/
+python3 weekly_brief.py                 # both languages to briefs/
 python3 weekly_brief.py --lang te       # Telugu only
 python3 weekly_brief.py --no-news       # prices only, much faster
-python3 weekly_brief.py --email         # also email it
+python3 weekly_brief.py --email         # also email, one message per language
 ```
+
+Output files are suffixed with the language: `ap-maize-brief-2026-07-28-en.md`,
+`ap-maize-brief-2026-07-28-te.md`, plus the matching `.html`.
 
 No third-party dependencies — standard library only, Python 3.8+.
 
